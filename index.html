@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedientes Asignados</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Página de inicio - MODIFICADO */
+        #pagina-inicio {
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f4c75 0%, #1b6ca8 50%, #28a745 100%);
+        }
+
+        .contenedor-titulo {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 20px; /* Reducido de 40px */
+        }
+
+        .titulo-principal {
+            font-size: clamp(2rem, 4vw, 3rem); /* Reducido */
+            font-weight: 700;
+            margin-bottom: 15px; /* Reducido */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            line-height: 1.2; /* Añadido */
+        }
+
+        .subtitulo {
+            font-size: clamp(1rem, 2vw, 1.4rem); /* Reducido */
+            font-weight: 300;
+            margin-bottom: 30px; /* Reducido */
+            opacity: 0.95;
+            line-height: 1.4; /* Reducido */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            max-width: 500px; /* Reducido */
+        }
+
+        .contenedor-login {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .login-titulo {
+            font-size: 1.8rem;
+            color: #0f4c75;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #0f4c75;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: white;
+            color: #333;
+            font-size: 1rem;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .form-group input:disabled, .form-group select:disabled, .form-group textarea:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+
+        .btn-ingresar {
+            width: 100%;
+            padding: 15px;
+            background-color: #1e7b34;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .btn-ingresar:hover {
+            background-color: #28a745;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Página de aplicación */
+        #pagina-app {
+            display: none;
+        }
+
+        /* Encabezado */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: #0f4c75;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background-color: #1e7b34;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #28a745;
+        }
+
+        .btn-primary {
+            background-color: #0f4c75;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b6ca8;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Panel de filtros */
+        .filters {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters input, .filters select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: white;
+            color: #333;
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+        }
+
+        /* Tabla de expedientes - MODIFICADO (una columna menos) */
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px; /* Reducido porque eliminamos una columna */
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #0f4c75;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Columna # con ancho fijo */
+        th:first-child, td:first-child {
+            width: 50px; /* Ancho fijo para 4 caracteres */
+            max-width: 50px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        td:last-child {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-success-sm {
+            background-color: #1e7b34;
+            color: white;
+        }
+
+        .btn-danger-sm {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background-color: #0f4c75;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-weight: 400;
+            color: white;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .info-group {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #0f4c75;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Modal de registro/edición - MODIFICADO */
+        .modal-registro {
+            max-width: 800px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e9ecef;
+            border: none;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background-color: #0f4c75;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .conditional-field {
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* Tabla de notas */
+        .notas-container {
+            margin-bottom: 15px;
+        }
+
+        .notas-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .notas-table th, .notas-table td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .notas-table th {
+            background-color: #e9ecef;
+            font-weight: 500;
+        }
+
+        .notas-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .notas-table td:last-child {
+            display: table-cell;
+            text-align: left;
+        }
+
+        .agregar-nota {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .agregar-nota input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        .agregar-nota button {
+            padding: 8px 15px;
+            background-color: #0f4c75;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Paginación */
+        .paginacion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .paginacion-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .paginacion-controles {
+            display: flex;
+            gap: 5px;
+        }
+
+        .paginacion-btn {
+            padding: 5px 10px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .paginacion-btn.active {
+            background-color: #0f4c75;
+            color: white;
+            border-color: #0f4c75;
+        }
+
+        .paginacion-btn:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Alertas y validaciones */
+        .visual-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+        }
+
+        .visual-alert.show {
+            opacity: 1;
+            top: 40px;
+        }
+        
+        /* Alerta Verde (Success) */
+        .alert-success {
+            background-color: #28a745;
+            color: white;
+            border: 1px solid #1e7b34;
+        }
+
+        .alert-danger {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #c82333;
+        }
+        
+        .alert-warning {
+            background-color: #ffc107;
+            color: #212529;
+            border: 1px solid #e0a800;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Selector de fecha personalizado */
+        .date-input-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .date-input-container input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            width: 100%;
+            background-color: white;
+        }
+
+        /* Estilo para el calendario nativo */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #pagina-inicio {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .contenedor-titulo {
+                padding: 20px; /* Reducido */
+            }
+
+            .contenedor-login {
+                width: 100%;
+                box-shadow: none;
+                padding: 30px;
+            }
+            
+            .titulo-principal {
+                font-size: 2rem; /* Reducido */
+            }
+            
+            .subtitulo {
+                font-size: 1.1rem; /* Reducido */
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filters input, .filters select {
+                max-width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .agregar-nota {
+                flex-direction: column;
+            }
+            
+            .paginacion {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            /* Ajustes responsive para la tabla */
+            .table-container {
+                font-size: 0.9rem;
+            }
+            
+            th:first-child, td:first-child {
+                width: 40px; /* Ajuste para pantallas más pequeñas */
+                max-width: 40px;
+                min-width: 40px;
+                padding: 10px 5px;
+            }
+        }
+
+        /* PAGINACIÓN DE TABLA PRINCIPAL */
+        .tabla-paginacion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .tabla-paginacion-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .tabla-paginacion-controles {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tabla-paginacion-btn {
+            padding: 5px 10px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .tabla-paginacion-btn.active {
+            background-color: #0f4c75;
+            color: white;
+            border-color: #0f4c75;
+        }
+
+        .tabla-paginacion-btn:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* ESTILOS PARA IMPRESIÓN */
+        @media print {
+            /* Ocultar elementos que no deben imprimirse */
+            #pagina-inicio,
+            .app-header,
+            .filters,
+            .tabla-paginacion,
+            td:last-child,
+            .header-buttons,
+            .btn {
+                display: none !important;
+            }
+            
+            /* Mostrar solo la tabla de registros */
+            #pagina-app {
+                display: block !important;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .table-container {
+                box-shadow: none;
+                border-radius: 0;
+                margin-bottom: 0;
+            }
+            
+            table {
+                min-width: 100%;
+                width: 100%;
+                border: 1px solid #000;
+            }
+            
+            th, td {
+                border: 1px solid #000;
+                padding: 8px;
+            }
+            
+            th {
+                background-color: #f0f0f0 !important;
+                color: #000 !important;
+                font-weight: bold;
+            }
+            
+            /* Asegurar que la tabla ocupe toda la página */
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 10px;
+                font-size: 12px;
+            }
+            
+            /* Eliminar espacios innecesarios */
+            * {
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="pagina-inicio">
+        <div class="contenedor-titulo">
+            <h4 class="titulo-principal">Causas Judiciales Asignadas</h4>
+            <p class="subtitulo">Defensoría Civil y Comercial N° 6<br>Poder Judicial de Misiones<br><strong>Agente: Nadia Romina Bazante</strong></p>
+        </div>
+        <div class="contenedor-login">
+            <h2 class="login-titulo">Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="Ingrese su correo electrónico">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingrese su contraseña">
+            </div>
+            <button class="btn-ingresar" id="btn-ingresar">Ingresar al Sistema</button>
+        </div>
+    </div>
+
+    <div id="pagina-app">
+        <div class="container">
+            <div class="app-header">
+                <h1 class="app-title">Expedientes Asignados</h1>
+                <div class="header-buttons">
+                    <span style="margin-right: 15px; color: #0f4c75; font-weight: 500; font-size: 1.1rem;">Bienvenida Nadia Romina Bazante</span>
+                    <button class="btn btn-success" id="nuevo-btn">Nuevo Expediente</button>
+                    <button class="btn btn-primary" id="reporte-btn">Reporte</button>
+                    <button class="btn btn-primary" id="print-btn">Imprimir Listado</button>
+                    <button class="btn btn-danger" id="close-btn">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div class="filters">
+                <input type="text" id="search" placeholder="Buscar en registros...">
+                <select id="month-filter">
+                    <option value="">Todos los meses</option>
+                    <option value="01">Enero</option>
+                    <option value="02">Febrero</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Mayo</option>
+                    <option value="06">Junio</option>
+                    <option value="07">Julio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+                <select id="year-filter">
+                    <option value="" selected>Todos los años</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                </select>
+                <select id="signature-filter">
+                    <option value="">Todas las firmas</option>
+                    <option value="Secretario">Secretario</option>
+                    <option value="Defensor Titular">Defensor Titular</option>
+                    <option value="Defensor Subrogante">Defensor Subrogante</option>
+                </select>
+                <!-- NUEVOS FILTROS AÑADIDOS -->
+                <select id="control-filter">
+                    <option value="">Todos los controles</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En control">En control</option>
+                    <option value="Completado el control">Completado</option>
+                </select>
+                <select id="juzgado-filter">
+                    <option value="">Todos los juzgados</option>
+                    <optgroup label="Administrativo">
+                        <option value="CEJUME - Posadas">CEJUME - Posadas</option>
+                        <option value="DEUT Defensorias - Posadas">DEUT Defensorias - Posadas</option>
+                        <option value="Legajo Defensoria Civil y Comercial N° 6">Legajo Defensoria Civil y Comercial N° 6</option>
+                    </optgroup>
+                    <optgroup label="Civil">
+                        <option value="Juzgado Civil y Comercial N° 1 - Posadas">Juzgado Civil y Comercial N° 1 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 2 - Posadas">Juzgado Civil y Comercial N° 2 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 3 - Posadas">Juzgado Civil y Comercial N° 3 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 4 - Posadas">Juzgado Civil y Comercial N° 4 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 5 - Posadas">Juzgado Civil y Comercial N° 5 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 6 - Posadas">Juzgado Civil y Comercial N° 6 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 7 - Posadas">Juzgado Civil y Comercial N° 7 - Posadas</option>
+                        <option value="Juzgado Civil y Comercial N° 8 - Posadas">Juzgado Civil y Comercial N° 8 - Posadas</option>
+                        <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                    </optgroup>
+                    <optgroup label="Penal">
+                        <option value="Juzgado de Instrucción N° 1 - Posadas">Juzgado de Instrucción N° 1 - Posadas</option>
+                        <option value="Juzgado de Instrucción N° 2 - Posadas">Juzgado de Instrucción N° 2 - Posadas</option>
+                        <option value="Juzgado de Instrucción N° 3 - Posadas">Juzgado de Instrucción N° 3 - Posadas</option>
+                        <option value="Juzgado de Instrucción N° 6 - Posadas">Juzgado de Instrucción N° 6 - Posadas</option>
+                        <option value="Juzgado de Instrucción N° 7 - Posadas">Juzgado de Instrucción N° 7 - Posadas</option>
+                        <option value="Juzgado Correccional y de Menores N° 1 - Posadas">Juzgado Correccional y de Menores N° 1 - Posadas</option>
+                        <option value="Juzgado Correccional y de Menores N° 2 - Posadas">Juzgado Correccional y de Menores N° 2 - Posadas</option>
+                        <option value="Tribunal Penal N° 1 - Posadas">Tribunal Penal N° 1 - Posadas</option>
+                        <option value="Tribunal Penal N° 2 - Posadas">Tribunal Penal N° 2 - Posadas</option>
+                    </optgroup>
+                    <optgroup label="Laboral">
+                        <option value="Juzgado Laboral N° 1 - Posadas">Juzgado Laboral N° 1 - Posadas</option>
+                        <option value="Juzgado Laboral N° 2 - Posadas">Juzgado Laboral N° 2 - Posadas</option>
+                        <option value="Juzgado Laboral N° 3 - Posadas">Juzgado Laboral N° 3 - Posadas</option>
+                        <option value="Juzgado Laboral N° 4 - Posadas">Juzgado Laboral N° 4 - Posadas</option>
+                    </optgroup>
+                    <optgroup label="Familia">
+                        <option value="Juzgado de Familia N° 1 - Posadas">Juzgado de Familia N° 1 - Posadas</option>
+                        <option value="Juzgado de Familia N° 2 - Posadas">Juzgado de Familia N° 2 - Posadas</option>
+                        <option value="Juzgado de Familia N° 3 - Posadas">Juzgado de Familia N° 3 - Posadas</option>
+                        <option value="Juzgado Familia y VF Garupa">Juzgado Familia y VF Garupa</option>
+                        <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                    </optgroup>
+                    <optgroup label="Violencia Familiar">
+                        <option value="Juzgado de Violencia Familiar N° 1 - Posadas">Juzgado de Violencia Familiar N° 1 - Posadas</option>
+                        <option value="Juzgado de Violencia Familiar N° 2 - Posadas">Juzgado de Violencia Familiar N° 2 - Posadas</option>
+                        <option value="Juzgado F y Violencia Familiar Garupa">Juzgado F y Violencia Familiar Garupa</option>
+                        <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                    </optgroup>
+                    <optgroup label="Paz">
+                        <option value="Juzgado de Paz Civil Comercial N° 1 - Posadas">Juzgado de Paz Civil Comercial N° 1 - Posadas</option>
+                        <option value="Juzgado de Paz Civil Comercial N° 2 - Posadas">Juzgado de Paz Civil Comercial N° 2 - Posadas</option>
+                        <option value="Juzgado de Paz de Itaembe Mini - Posadas">Juzgado de Paz de Itaembe Mini - Posadas</option>
+                        <option value="Juzgado de Paz de Itaembe Guazu - Posadas">Juzgado de Paz de Itaembe Guazu - Posadas</option>
+                        <option value="Juzgado de Paz de Villa Cabello - Posadas">Juzgado de Paz de Villa Cabello - Posadas</option>
+                        <option value="Juzgado de Paz de Garupa">Juzgado de Paz de Garupa</option>
+                        <option value="Juzgado de Paz de Fatima - Garupa">Juzgado de Paz de Fatima - Garupa</option>
+                        <option value="Juzgado de Paz de Apostoles">Juzgado de Paz de Apostoles</option>
+                        <option value="Juzgado de Paz de Candelaria">Juzgado de Paz de Candelaria</option>
+                    </optgroup>
+                </select>
+                <select id="intervencion-filter">
+                    <option value="">Todas las intervenciones</option>
+                    <option value="Ministerio Complementario">Ministerio Complementario</option>
+                    <option value="Ministerio Principal">Ministerio Principal</option>
+                    <option value="Patrocinante Actor">Patrocinante Actor</option>
+                    <option value="Patrocinante Demandado">Patrocinante Demandado</option>
+                    <option value="Patrocinante Tercero">Patrocinante Tercero</option>
+                    <option value="Defensor de Ausente">Defensor de Ausente</option>
+                    <option value="Defensor MPC Incapaz">Defensor MPC incapaz</option>
+                    <option value="Asesor de incapaces">Asesor de incapaces</option>
+                </select>
+            </div>
+
+            <!-- PAGINACIÓN SUPERIOR -->
+            <div class="tabla-paginacion" id="tabla-paginacion-superior">
+                <div class="tabla-paginacion-info" id="tabla-paginacion-info-superior">Mostrando 0-0 de 0 expedientes</div>
+                <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-superior"></div>
+            </div>
+
+            <div class="table-container">
+                <table id="expedientes-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Fecha de pase</th>
+                            <!-- COLUMNA UNIFICADA: Se eliminó "Nº Expediente" y "Carátula" -->
+                            <th>Expediente y Carátula</th>
+                            <th>Descripción</th>
+                            <th>Firma Digital</th>
+                            <th>Observaciones</th>
+                            <th class="no-print">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expedientes-tbody">
+                        </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINACIÓN INFERIOR -->
+            <div class="tabla-paginacion" id="tabla-paginacion-inferior">
+                <div class="tabla-paginacion-info" id="tabla-paginacion-info-inferior">Mostrando 0-0 de 0 expedientes</div>
+                <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-inferior"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="expediente-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles del Expediente</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-group">
+                    <div class="info-label">Número y Año</div>
+                    <div class="info-value" id="modal-numero-y-anio"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Carátula de la causa</div>
+                    <div class="info-value" id="modal-caratula"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Juzgado</div>
+                    <div class="info-value" id="modal-juzgado"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Modo de Intervención</div>
+                    <div class="info-value" id="modal-intervencion"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Fecha de Pase</div>
+                    <div class="info-value" id="modal-fecha-pase"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Descripción</div>
+                    <div class="info-value" id="modal-descripcion"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Control de Secretario</div>
+                    <div class="info-value" id="modal-control-secretario"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Fecha de Firma Digital</div>
+                    <div class="info-value" id="modal-fecha-firma"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Firma Secretario</div>
+                    <div class="info-value" id="modal-firma-secretario"></div>
+                </div>
+                <div class="info-group" id="modal-firma-defensor-group" style="display: none;">
+                    <div class="info-label">Firma Defensor</div>
+                    <div class="info-value" id="modal-firma-defensor"></div>
+                </div>
+                <div class="info-group" id="modal-subrogante-group" style="display: none;">
+                    <div class="info-label">Especificación Subrogante</div>
+                    <div class="info-value" id="modal-subrogante"></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Observaciones</div>
+                    <div class="info-value" id="modal-observaciones"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cerrar-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registro-modal">
+        <div class="modal-content modal-registro">
+            <div class="modal-header">
+                <h2 id="registro-modal-title">Nuevo Expediente</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab active" data-tab="datos-expediente">Datos del Expediente</button>
+                    <button class="tab" data-tab="detalle-tarea">Detalle de Tarea</button>
+                    <button class="tab" data-tab="observaciones">Observaciones</button>
+                </div>
+
+                <div class="tab-content active" id="datos-expediente">
+                    <div class="form-group">
+                        <label for="numero-y-anio">Número y Año *</label>
+                        <input type="text" id="numero-y-anio" placeholder="Ej: 123/2024">
+                        <div class="error-message" id="error-numero-y-anio">Este número de expediente ya existe.</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="caratula-causa">Carátula de la causa *</label>
+                        <textarea id="caratula-causa" placeholder="Ingrese la carátula de la causa"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha-pase">Fecha de Pase *</label>
+                            <div class="date-input-container">
+                                <input type="date" id="fecha-pase">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="juzgado">Juzgado *</label>
+                            <select id="juzgado">
+                                <option value="">Seleccionar Juzgado</option>
+                                <optgroup label="Administrativo">
+                                    <option value="CEJUME - Posadas">CEJUME - Posadas</option>
+                                    <option value="DEUT Defensorias - Posadas">DEUT Defensorias - Posadas</option>
+                                    <option value="Legajo Defensoria Civil y Comercial N° 6">Legajo Defensoria Civil y Comercial N° 6</option>
+                                </optgroup>
+                                <optgroup label="Civil">
+                                    <option value="Juzgado Civil y Comercial N° 1 - Posadas">Juzgado Civil y Comercial N° 1 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 2 - Posadas">Juzgado Civil y Comercial N° 2 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 3 - Posadas">Juzgado Civil y Comercial N° 3 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 4 - Posadas">Juzgado Civil y Comercial N° 4 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 5 - Posadas">Juzgado Civil y Comercial N° 5 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 6 - Posadas">Juzgado Civil y Comercial N° 6 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 7 - Posadas">Juzgado Civil y Comercial N° 7 - Posadas</option>
+                                    <option value="Juzgado Civil y Comercial N° 8 - Posadas">Juzgado Civil y Comercial N° 8 - Posadas</option>
+                                    <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                                </optgroup>
+                                <optgroup label="Penal">
+                                    <option value="Juzgado de Instrucción N° 1 - Posadas">Juzgado de Instrucción N° 1 - Posadas</option>
+                                    <option value="Juzgado de Instrucción N° 2 - Posadas">Juzgado de Instrucción N° 2 - Posadas</option>
+                                    <option value="Juzgado de Instrucción N° 3 - Posadas">Juzgado de Instrucción N° 3 - Posadas</option>
+                                    <option value="Juzgado de Instrucción N° 6 - Posadas">Juzgado de Instrucción N° 6 - Posadas</option>
+                                    <option value="Juzgado de Instrucción N° 7 - Posadas">Juzgado de Instrucción N° 7 - Posadas</option>
+                                    <option value="Juzgado Correccional y de Menores N° 1 - Posadas">Juzgado Correccional y de Menores N° 1 - Posadas</option>
+                                    <option value="Juzgado Correccional y de Menores N° 2 - Posadas">Juzgado Correccional y de Menores N° 2 - Posadas</option>
+                                    <option value="Tribunal Penal N° 1 - Posadas">Tribunal Penal N° 1 - Posadas</option>
+                                    <option value="Tribunal Penal N° 2 - Posadas">Tribunal Penal N° 2 - Posadas</option>
+                                </optgroup>
+                                <optgroup label="Laboral">
+                                    <option value="Juzgado Laboral N° 1 - Posadas">Juzgado Laboral N° 1 - Posadas</option>
+                                    <option value="Juzgado Laboral N° 2 - Posadas">Juzgado Laboral N° 2 - Posadas</option>
+                                    <option value="Juzgado Laboral N° 3 - Posadas">Juzgado Laboral N° 3 - Posadas</option>
+                                    <option value="Juzgado Laboral N° 4 - Posadas">Juzgado Laboral N° 4 - Posadas</option>
+                                </optgroup>
+                                <optgroup label="Familia">
+                                    <option value="Juzgado de Familia N° 1 - Posadas">Juzgado de Familia N° 1 - Posadas</option>
+                                    <option value="Juzgado de Familia N° 2 - Posadas">Juzgado de Familia N° 2 - Posadas</option>
+                                    <option value="Juzgado de Familia N° 3 - Posadas">Juzgado de Familia N° 3 - Posadas</option>
+                                    <option value="Juzgado Familia y VF Garupa">Juzgado Familia y VF Garupa</option>
+                                    <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                                </optgroup>
+                                <optgroup label="Violencia Familiar">
+                                    <option value="Juzgado de Violencia Familiar N° 1 - Posadas">Juzgado de Violencia Familiar N° 1 - Posadas</option>
+                                    <option value="Juzgado de Violencia Familiar N° 2 - Posadas">Juzgado de Violencia Familiar N° 2 - Posadas</option>
+                                    <option value="Juzgado F y Violencia Familiar Garupa">Juzgado F y Violencia Familiar Garupa</option>
+                                    <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                                </optgroup>
+                                <optgroup label="Paz">
+                                    <option value="Juzgado de Paz Civil Comercial N° 1 - Posadas">Juzgado de Paz Civil Comercial N° 1 - Posadas</option>
+                                    <option value="Juzgado de Paz Civil Comercial N° 2 - Posadas">Juzgado de Paz Civil Comercial N° 2 - Posadas</option>
+                                    <option value="Juzgado de Paz de Itaembe Mini - Posadas">Juzgado de Paz de Itaembe Mini - Posadas</option>
+                                    <option value="Juzgado de Paz de Itaembe Guazu - Posadas">Juzgado de Paz de Itaembe Guazu - Posadas</option>
+                                    <option value="Juzgado de Paz de Villa Cabello - Posadas">Juzgado de Paz de Villa Cabello - Posadas</option>
+                                    <option value="Juzgado de Paz de Garupa">Juzgado de Paz de Garupa</option>
+                                    <option value="Juzgado de Paz de Fatima - Garupa">Juzgado de Paz de Fatima - Garupa</option>
+                                    <option value="Juzgado de Paz de Apostoles">Juzgado de Paz de Apostoles</option>
+                                    <option value="Juzgado de Paz de Candelaria">Juzgado de Paz de Candelaria</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modo-intervencion">Modo de Intervención *</label>
+                            <select id="modo-intervencion">
+                                <option value="">Seleccionar Modo</option>
+                                <option value="Ministerio Complementario">Ministerio Complementario</option>
+                                <option value="Ministerio Principal">Ministerio Principal</option>
+                                <option value="Patrocinante Actor">Patrocinante Actor</option>
+                                <option value="Patrocinante Demandado">Patrocinante Demandado</option>
+                                <option value="Patrocinante Tercero">Patrocinante Tercero</option>
+                                <option value="Defensor de Ausente">Defensor de Ausente</option>
+                                <option value="Defensor MPC Incapaz">Defensor MPC Incapaz</option>
+                                <option value="Asesor de incapaces">Asesor de incapaces</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="detalle-tarea">
+                    <div class="form-group">
+                        <label for="descripcion-tarea">Descripción *</label>
+                        <textarea id="descripcion-tarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="control-secretario">Control de Secretario *</label>
+                            <select id="control-secretario">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En control">En control</option>
+                                <option value="Completado el control">Completado el control</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha-firma-digital">Fecha de Firma Digital</label>
+                            <div class="date-input-container">
+                                <input type="date" id="fecha-firma-digital">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="firma-secretario">Firma Secretario *</label>
+                        <select id="firma-secretario">
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field" id="secretario-field">
+                        <div class="form-group">
+                            <label for="secretario-select">Secretario *</label>
+                            <select id="secretario-select">
+                                <option value="Dra Patricia Soledad Riveros">Dra Patricia Soledad Riveros</option>
+                                <option value="Dra Alicia Mariela Corrales">Dra Alicia Mariela Corrales</option>
+                                <option value="Dr Enzo Luciano Magnani">Dr Enzo Luciano Magnani</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="conditional-field" id="firma-defensor-field">
+                        <div class="form-group">
+                            <label for="firma-defensor">Firma Defensor *</label>
+                            <select id="firma-defensor">
+                                <option value="Defensor Titular">Defensor Titular</option>
+                                <option value="Defensor Subrogante">Defensor Subrogante</option>
+                            </select>
+                        </div>
+                        <div class="conditional-field" id="subrogante-field">
+                            <div class="form-group">
+                                <label for="subrogante-texto">Especificar Subrogante *</label>
+                                <input type="text" id="subrogante-texto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="observaciones">
+                    <div class="form-group">
+                        <label>Notas de Observación</label>
+                        <div class="notas-container">
+                            <table class="notas-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Nota</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo-tabla-notas">
+                                    </tbody>
+                            </table>
+                            <div class="paginacion" id="paginacion-notas">
+                                <div class="paginacion-info" id="info-paginacion">Mostrando 0-0 de 0 notas</div>
+                                <div class="paginacion-controles" id="controles-paginacion">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="agregar-nota">
+                        <div class="date-input-container">
+                            <input type="date" id="fecha-nota">
+                        </div>
+                        <input type="text" id="texto-nota" placeholder="Escriba una nota">
+                        <button id="agregar-nota-btn">Agregar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="registro-cancelar-btn">Cancelar</button>
+                <button class="btn btn-success" id="registro-guardar-btn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA4VNaoHo7W28gv6W6xYeEJD3_WuVdCpdE",
+
+  authDomain: "causas-bazante.firebaseapp.com",
+
+  projectId: "causas-bazante",
+
+  storageBucket: "causas-bazante.firebasestorage.app",
+
+  messagingSenderId: "963625595879",
+
+  appId: "1:963625595879:web:e7d442961028d08cab0342"
+
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Elementos DOM
+        const paginaInicio = document.getElementById('pagina-inicio');
+        const paginaApp = document.getElementById('pagina-app');
+        const btnIngresar = document.getElementById('btn-ingresar');
+        const expedientesTbody = document.getElementById('expedientes-tbody');
+        const modal = document.getElementById('expediente-modal');
+        const registroModal = document.getElementById('registro-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const modalCerrarBtn = document.getElementById('modal-cerrar-btn');
+        const printBtn = document.getElementById('print-btn');
+        const reporteBtn = document.getElementById('reporte-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const nuevoBtn = document.getElementById('nuevo-btn');
+        const searchInput = document.getElementById('search');
+        const monthFilter = document.getElementById('month-filter');
+        const yearFilter = document.getElementById('year-filter');
+        const signatureFilter = document.getElementById('signature-filter');
+        // NUEVOS FILTROS
+        const controlFilter = document.getElementById('control-filter');
+        const juzgadoFilter = document.getElementById('juzgado-filter');
+        const intervencionFilter = document.getElementById('intervencion-filter');
+        
+        const registroCancelarBtn = document.getElementById('registro-cancelar-btn');
+        const registroGuardarBtn = document.getElementById('registro-guardar-btn');
+        const registroModalTitle = document.getElementById('registro-modal-title');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const controlSecretarioSelect = document.getElementById('control-secretario');
+        const firmaSecretarioSelect = document.getElementById('firma-secretario');
+        const secretarioField = document.getElementById('secretario-field');
+        const secretarioSelect = document.getElementById('secretario-select');
+        const firmaDefensorField = document.getElementById('firma-defensor-field');
+        const firmaDefensorSelect = document.getElementById('firma-defensor');
+        const subroganteField = document.getElementById('subrogante-field');
+        const subroganteTextoInput = document.getElementById('subrogante-texto');
+        const numeroYAnioInput = document.getElementById('numero-y-anio');
+        const caratulaCausaInput = document.getElementById('caratula-causa');
+        const errorNumeroYAnio = document.getElementById('error-numero-y-anio');
+        const cuerpoTablaNotas = document.getElementById('cuerpo-tabla-notas');
+        const fechaNotaInput = document.getElementById('fecha-nota');
+        const textoNotaInput = document.getElementById('texto-nota');
+        const agregarNotaBtn = document.getElementById('agregar-nota-btn');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const infoPaginacion = document.getElementById('info-paginacion');
+        const controlesPaginacion = document.getElementById('controles-paginacion');
+
+        // Variables de estado
+        let expedientes = [];
+        let expedienteEditando = null;
+        let notasTemporales = [];
+        let paginaActualNotas = 1;
+        const notasPorPagina = 5;
+        
+        // Variables para paginación de tabla principal
+        let paginaActualTabla = 1;
+        const registrosPorPagina = 10;
+
+        // --- Funciones de Utilidad ---
+        function formatearFecha(fecha) {
+            if (!fecha || typeof fecha !== 'string') return '';
+            const partes = fecha.split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return fecha;
+        }
+
+        function formatearFechaParaInput(fecha) {
+            if (!fecha || typeof fecha !== 'string') return '';
+            const partes = fecha.split('/');
+            if (partes.length === 3) {
+                return `${partes[2]}-${partes[1]}-${partes[0]}`;
+            }
+            return fecha;
+        }
+        
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const alerta = document.createElement('div');
+            alerta.className = `visual-alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            document.body.appendChild(alerta);
+
+            setTimeout(() => alerta.classList.add('show'), 10);
+
+            setTimeout(() => {
+                alerta.classList.remove('show');
+                alerta.addEventListener('transitionend', () => alerta.remove());
+            }, 4000);
+        }
+        
+        // --- Lógica de la Aplicación ---
+        async function cargarExpedientes() {
+            try {
+                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Cargando expedientes...</td></tr>`; // Cambiado a 7 columnas
+                const querySnapshot = await db.collection('expedientes').get();
+                expedientes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // ORDEN DESCENDENTE: Más reciente primero
+                expedientes.sort((a, b) => {
+                     const fechaA = new Date(formatearFechaParaInput(a.fechaPase));
+                     const fechaB = new Date(formatearFechaParaInput(b.fechaPase));
+                     return fechaB - fechaA; // Cambiado para orden descendente
+                });
+
+                mostrarExpedientesEnTabla();
+            } catch (error) {
+                console.error('Error al cargar expedientes:', error);
+                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error al cargar los expedientes</td></tr>`; // Cambiado a 7 columnas
+            }
+        }
+
+        function mostrarExpedientesEnTabla() {
+            expedientesTbody.innerHTML = '';
+            
+            const expedientesFiltrados = expedientes.filter(exp => {
+                const searchText = searchInput.value.toLowerCase();
+                const selectedMonth = monthFilter.value;
+                const selectedYear = yearFilter.value;
+                const selectedSignature = signatureFilter.value;
+                // NUEVOS FILTROS
+                const selectedControl = controlFilter.value;
+                const selectedJuzgado = juzgadoFilter.value;
+                const selectedIntervencion = intervencionFilter.value;
+                
+                if (searchText && 
+                    !(exp.numeroYAnio?.toLowerCase().includes(searchText) ||
+                      exp.descripcion?.toLowerCase().includes(searchText) ||
+                      exp.caratula?.toLowerCase().includes(searchText))) {
+                    return false;
+                }
+                
+                const fechaParts = exp.fechaPase ? exp.fechaPase.split('/') : [];
+                if (fechaParts.length === 3) {
+                    if (selectedMonth && fechaParts[1] !== selectedMonth) return false;
+                    if (selectedYear && fechaParts[2] !== selectedYear) return false;
+                } else if (selectedMonth || selectedYear) {
+                    return false;
+                }
+                
+                if (selectedSignature) {
+                    const recordSignature = exp.firmaSecretario === 'si' ? 'Secretario' : exp.firmaDefensor;
+                    if (recordSignature !== selectedSignature) return false;
+                }
+                
+                // NUEVOS FILTROS
+                if (selectedControl && exp.controlSecretario !== selectedControl) return false;
+                if (selectedJuzgado && exp.juzgado !== selectedJuzgado) return false;
+                if (selectedIntervencion && exp.modoIntervencion !== selectedIntervencion) return false;
+                
+                return true;
+            });
+            
+            // Calcular paginación
+            const totalExpedientes = expedientesFiltrados.length;
+            const totalPaginas = Math.ceil(totalExpedientes / registrosPorPagina);
+            
+            // Asegurar que la página actual está en un rango válido
+            if (paginaActualTabla > totalPaginas) {
+                paginaActualTabla = Math.max(1, totalPaginas);
+            }
+            
+            const inicio = (paginaActualTabla - 1) * registrosPorPagina;
+            const fin = inicio + registrosPorPagina;
+            const expedientesPagina = expedientesFiltrados.slice(inicio, fin);
+            
+            if (expedientesPagina.length === 0) {
+                const message = expedientes.length === 0 ? "No hay expedientes registrados" : "No se encontraron expedientes con los filtros aplicados.";
+                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">${message}</td></tr>`; // Cambiado a 7 columnas
+            } else {
+                // NUMERACIÓN DESCENDENTE CORREGIDA: El registro más reciente tiene el número más alto
+                expedientesPagina.forEach((exp, index) => {
+                    const row = expedientesTbody.insertRow();
+                    const numeroDescendente = totalExpedientes - inicio - index; // El más reciente tendrá el número más alto
+                    
+                    let observacionesTexto = '';
+                    if (exp.notas && exp.notas.length > 0) {
+                        const ultimaNota = exp.notas[exp.notas.length - 1];
+                        observacionesTexto = `${ultimaNota.fecha}: ${ultimaNota.texto.substring(0, 30)}${ultimaNota.texto.length > 30 ? '...' : ''}`;
+                        if (exp.notas.length > 1) {
+                            observacionesTexto += ` (${exp.notas.length} notas)`;
+                        }
+                    }
+                    
+                    const firmaDigital = exp.fechaFirmaDigital ? 'si' : 'no';
+                    
+                    // COLUMNA UNIFICADA: Se muestran número y carátula juntos
+                    row.innerHTML = `
+                        <td>${numeroDescendente}</td>
+                        <td>${exp.fechaPase || 'N/A'}</td>
+                        <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td>
+                        <td>${exp.descripcion || 'N/A'}</td>
+                        <td>
+                            <button class="btn-sm ${firmaDigital === 'si' ? 'btn-success-sm' : 'btn-danger-sm'}" disabled>
+                                ${firmaDigital === 'si' ? 'Sí' : 'No'}
+                            </button>
+                        </td>
+                        <td>${observacionesTexto}</td>
+                        <td class="no-print">
+                            <button class="btn-sm btn-info ver-btn" data-id="${exp.id}">Ver</button>
+                            <button class="btn-sm btn-warning editar-btn" data-id="${exp.id}">Editar</button>
+                            <button class="btn-sm btn-danger eliminar-btn" data-id="${exp.id}">Eliminar</button>
+                        </td>
+                    `;
+                });
+            }
+            
+            // Actualizar controles de paginación
+            actualizarPaginacionTabla(totalExpedientes, totalPaginas);
+        }
+        
+        function actualizarPaginacionTabla(totalExpedientes, totalPaginas) {
+            // Actualizar información de paginación
+            const inicio = (paginaActualTabla - 1) * registrosPorPagina + 1;
+            const fin = Math.min(paginaActualTabla * registrosPorPagina, totalExpedientes);
+            
+            const infoTexto = totalExpedientes === 0 
+                ? 'No hay expedientes' 
+                : `Mostrando ${inicio}-${fin} de ${totalExpedientes} expedientes`;
+            
+            document.getElementById('tabla-paginacion-info-superior').textContent = infoTexto;
+            document.getElementById('tabla-paginacion-info-inferior').textContent = infoTexto;
+            
+            // Actualizar controles de paginación para ambos (superior e inferior)
+            actualizarControlesPaginacion('tabla-paginacion-controles-superior', totalPaginas);
+            actualizarControlesPaginacion('tabla-paginacion-controles-inferior', totalPaginas);
+        }
+        
+        function actualizarControlesPaginacion(contenedorId, totalPaginas) {
+            const controles = document.getElementById(contenedorId);
+            controles.innerHTML = '';
+            
+            if (totalPaginas <= 1) return;
+            
+            // Calcular el grupo de páginas actual (mostrar 5 páginas a la vez)
+            const paginasPorGrupo = 5;
+            const grupoActual = Math.ceil(paginaActualTabla / paginasPorGrupo);
+            const primeraPaginaGrupo = (grupoActual - 1) * paginasPorGrupo + 1;
+            const ultimaPaginaGrupo = Math.min(primeraPaginaGrupo + paginasPorGrupo - 1, totalPaginas);
+            
+            // Botón anterior
+            const btnAnterior = document.createElement('button');
+            btnAnterior.className = 'tabla-paginacion-btn';
+            btnAnterior.innerHTML = '&laquo;';
+            btnAnterior.disabled = paginaActualTabla === 1;
+            btnAnterior.addEventListener('click', () => {
+                if (paginaActualTabla > 1) {
+                    paginaActualTabla--;
+                    mostrarExpedientesEnTabla();
+                }
+            });
+            controles.appendChild(btnAnterior);
+            
+            // Botón anterior de grupo (<<)
+            if (primeraPaginaGrupo > 1) {
+                const btnAnteriorGrupo = document.createElement('button');
+                btnAnteriorGrupo.className = 'tabla-paginacion-btn';
+                btnAnteriorGrupo.innerHTML = '&lt;&lt;';
+                btnAnteriorGrupo.title = 'Grupo anterior';
+                btnAnteriorGrupo.addEventListener('click', () => {
+                    paginaActualTabla = primeraPaginaGrupo - paginasPorGrupo;
+                    mostrarExpedientesEnTabla();
+                });
+                controles.appendChild(btnAnteriorGrupo);
+            }
+            
+            // Botones de página (solo las 5 del grupo actual)
+            for (let i = primeraPaginaGrupo; i <= ultimaPaginaGrupo; i++) {
+                const btnPagina = document.createElement('button');
+                btnPagina.className = `tabla-paginacion-btn ${i === paginaActualTabla ? 'active' : ''}`;
+                btnPagina.textContent = i;
+                btnPagina.addEventListener('click', () => {
+                    paginaActualTabla = i;
+                    mostrarExpedientesEnTabla();
+                });
+                controles.appendChild(btnPagina);
+            }
+            
+            // Botón siguiente de grupo (>>)
+            if (ultimaPaginaGrupo < totalPaginas) {
+                const btnSiguienteGrupo = document.createElement('button');
+                btnSiguienteGrupo.className = 'tabla-paginacion-btn';
+                btnSiguienteGrupo.innerHTML = '&gt;&gt;';
+                btnSiguienteGrupo.title = 'Siguiente grupo';
+                btnSiguienteGrupo.addEventListener('click', () => {
+                    paginaActualTabla = primeraPaginaGrupo + paginasPorGrupo;
+                    mostrarExpedientesEnTabla();
+                });
+                controles.appendChild(btnSiguienteGrupo);
+            }
+            
+            // Botón siguiente
+            const btnSiguiente = document.createElement('button');
+            btnSiguiente.className = 'tabla-paginacion-btn';
+            btnSiguiente.innerHTML = '&raquo;';
+            btnSiguiente.disabled = paginaActualTabla === totalPaginas;
+            btnSiguiente.addEventListener('click', () => {
+                if (paginaActualTabla < totalPaginas) {
+                    paginaActualTabla++;
+                    mostrarExpedientesEnTabla();
+                }
+            });
+            controles.appendChild(btnSiguiente);
+        }
+        
+        // Función para imprimir el listado completo de expedientes
+        function imprimirListadoCompleto() {
+            // Crear una ventana nueva para imprimir
+            const ventanaImpresion = window.open('', '_blank');
+            
+            // Obtener todos los expedientes sin filtrar
+            const expedientesCompletos = [...expedientes];
+            
+            // Crear el contenido HTML para la impresión
+            let contenidoHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Listado Completo de Expedientes</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            font-size: 12px;
+                        }
+                        h1 {
+                            text-align: center;
+                            color: #0f4c75;
+                            margin-bottom: 20px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        th, td {
+                            border: 1px solid #000;
+                            padding: 8px;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #f0f0f0;
+                            font-weight: bold;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f9f9f9;
+                        }
+                        .firma-digital {
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Listado Completo de Expedientes</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha de pase</th>
+                                <th>Expediente y Carátula</th>
+                                <th>Descripción</th>
+                                <th>Firma Digital</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Agregar cada expediente a la tabla
+            expedientesCompletos.forEach((exp, index) => {
+                const numeroDescendente = expedientesCompletos.length - index;
+                
+                let observacionesTexto = '';
+                if (exp.notas && exp.notas.length > 0) {
+                    const ultimaNota = exp.notas[exp.notas.length - 1];
+                    observacionesTexto = `${ultimaNota.fecha}: ${ultimaNota.texto.substring(0, 30)}${ultimaNota.texto.length > 30 ? '...' : ''}`;
+                    if (exp.notas.length > 1) {
+                        observacionesTexto += ` (${exp.notas.length} notas)`;
+                    }
+                }
+                
+                const firmaDigital = exp.fechaFirmaDigital ? 'Sí' : 'No';
+                
+                contenidoHTML += `
+                    <tr>
+                        <td>${numeroDescendente}</td>
+                        <td>${exp.fechaPase || 'N/A'}</td>
+                        <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td>
+                        <td>${exp.descripcion || 'N/A'}</td>
+                        <td class="firma-digital">${firmaDigital}</td>
+                        <td>${observacionesTexto}</td>
+                    </tr>
+                `;
+            });
+            
+            contenidoHTML += `
+                        </tbody>
+                    </table>
+                    <p style="text-align: right; margin-top: 20px; font-size: 10px;">
+                        Generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
+                    </p>
+                </body>
+                </html>
+            `;
+            
+            // Escribir el contenido en la ventana de impresión
+            ventanaImpresion.document.write(contenidoHTML);
+            ventanaImpresion.document.close();
+            
+            // Esperar a que se cargue el contenido y luego imprimir
+            ventanaImpresion.onload = function() {
+                ventanaImpresion.focus();
+                ventanaImpresion.print();
+            };
+        }
+        
+        async function eliminarExpediente(id) {
+            try {
+                await db.collection('expedientes').doc(id).delete();
+                mostrarAlerta('Expediente eliminado correctamente.', 'success');
+                await cargarExpedientes();
+            } catch (error) {
+                console.error("Error al eliminar expediente: ", error);
+                mostrarAlerta('Error al eliminar el expediente.', 'danger');
+            }
+        }
+        
+        // --- Lógica de Firma Condicional ---
+        function actualizarEstadoFirma() {
+            const isCompleted = controlSecretarioSelect.value === 'Completado el control';
+            const firmaFields = [firmaSecretarioSelect, secretarioSelect, firmaDefensorSelect, subroganteTextoInput];
+            
+            firmaFields.forEach(field => field.disabled = !isCompleted);
+            
+            if (isCompleted) {
+                firmaSecretarioSelect.dispatchEvent(new Event('change'));
+            } else {
+                secretarioField.style.display = 'none';
+                firmaDefensorField.style.display = 'none';
+                subroganteField.style.display = 'none';
+            }
+        }
+
+        // --- Manejo de Modales ---
+        function abrirModalVer(id) {
+            const expediente = expedientes.find(exp => exp.id === id);
+            if (!expediente) return;
+
+            document.getElementById('modal-numero-y-anio').textContent = expediente.numeroYAnio || 'N/A';
+            document.getElementById('modal-caratula').textContent = expediente.caratula || 'N/A';
+            document.getElementById('modal-juzgado').textContent = expediente.juzgado || 'N/A';
+            document.getElementById('modal-intervencion').textContent = expediente.modoIntervencion || 'N/A';
+            document.getElementById('modal-fecha-pase').textContent = expediente.fechaPase || 'N/A';
+            document.getElementById('modal-descripcion').textContent = expediente.descripcion || 'N/A';
+            document.getElementById('modal-control-secretario').textContent = expediente.controlSecretario || 'N/A';
+            document.getElementById('modal-fecha-firma').textContent = expediente.fechaFirmaDigital || 'No registrada';
+            document.getElementById('modal-firma-secretario').textContent = expediente.firmaSecretario === 'si' ? 'Sí' : 'No';
+
+            let notasHTML = 'No hay observaciones registradas';
+            if (expediente.notas && expediente.notas.length > 0) {
+                notasHTML = [...expediente.notas].reverse().map(nota => `<div><strong>${nota.fecha}:</strong> ${nota.texto}</div>`).join('');
+            }
+            document.getElementById('modal-observaciones').innerHTML = notasHTML;
+
+            const firmaDefensorGroup = document.getElementById('modal-firma-defensor-group');
+            const subroganteGroup = document.getElementById('modal-subrogante-group');
+            
+            if (expediente.firmaSecretario === 'no') {
+                firmaDefensorGroup.style.display = 'block';
+                document.getElementById('modal-firma-defensor').textContent = expediente.firmaDefensor;
+                
+                if (expediente.firmaDefensor === 'Defensor Subrogante') {
+                    subroganteGroup.style.display = 'block';
+                    document.getElementById('modal-subrogante').textContent = expediente.subroganteTexto || 'No especificado';
+                } else {
+                    subroganteGroup.style.display = 'none';
+                }
+            } else {
+                firmaDefensorGroup.style.display = 'none';
+                subroganteGroup.style.display = 'none';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function limpiarFormularioRegistro() {
+            registroModal.querySelectorAll('input, textarea, select').forEach(el => {
+                if(el.type === 'select-one') el.selectedIndex = 0;
+                else el.value = '';
+            });
+            
+            document.getElementById('fecha-pase').valueAsDate = new Date();
+            fechaNotaInput.valueAsDate = new Date();
+            controlSecretarioSelect.value = 'Pendiente';
+            firmaSecretarioSelect.value = 'si';
+            secretarioSelect.value = 'Dra Patricia Soledad Riveros';
+            firmaDefensorSelect.value = 'Defensor Titular';
+        }
+
+        function abrirModalRegistro(id = null) {
+            if (id) {
+                expedienteEditando = expedientes.find(exp => exp.id === id);
+                if (!expedienteEditando) return;
+                
+                registroModalTitle.textContent = 'Editando Expediente';
+                numeroYAnioInput.value = expedienteEditando.numeroYAnio || '';
+                caratulaCausaInput.value = expedienteEditando.caratula || '';
+                document.getElementById('fecha-pase').value = formatearFechaParaInput(expedienteEditando.fechaPase);
+                document.getElementById('juzgado').value = expedienteEditando.juzgado || '';
+                document.getElementById('modo-intervencion').value = expedienteEditando.modoIntervencion || '';
+                document.getElementById('descripcion-tarea').value = expedienteEditando.descripcion || '';
+                controlSecretarioSelect.value = expedienteEditando.controlSecretario || 'Pendiente';
+                document.getElementById('fecha-firma-digital').value = formatearFechaParaInput(expedienteEditando.fechaFirmaDigital);
+                firmaSecretarioSelect.value = expedienteEditando.firmaSecretario || 'si';
+                
+                if (expedienteEditando.firmaSecretario === 'si') {
+                    secretarioSelect.value = expedienteEditando.secretario || 'Dra Patricia Soledad Riveros';
+                } else {
+                    firmaDefensorSelect.value = expedienteEditando.firmaDefensor || 'Defensor Titular';
+                    if (expedienteEditando.firmaDefensor === 'Defensor Subrogante') {
+                        subroganteTextoInput.value = expedienteEditando.subroganteTexto || '';
+                    }
+                }
+                
+                notasTemporales = expedienteEditando.notas ? [...expedienteEditando.notas] : [];
+            } else {
+                expedienteEditando = null;
+                registroModalTitle.textContent = 'Nuevo Expediente';
+                limpiarFormularioRegistro();
+                notasTemporales = [];
+            }
+            
+            actualizarEstadoFirma();
+            paginaActualNotas = 1;
+            actualizarTablaNotas();
+            
+            tabs[0].click();
+            registroModal.style.display = 'flex';
+        }
+
+        async function guardarExpediente() {
+            const numeroYAnio = numeroYAnioInput.value.trim();
+            const caratula = caratulaCausaInput.value.trim();
+
+            if (!numeroYAnio || !caratula || !document.getElementById('fecha-pase').value || !document.getElementById('juzgado').value || !document.getElementById('modo-intervencion').value || !document.getElementById('descripcion-tarea').value.trim()) {
+                alert('Por favor, complete todos los campos obligatorios (*)');
+                return;
+            }
+
+            const esDuplicado = expedientes.some(exp => exp.numeroYAnio === numeroYAnio && exp.id !== expedienteEditando?.id);
+            if (esDuplicado) {
+                 cerrarModalRegistro();
+                 mostrarAlerta("Causa existente, intente otra vez", "danger");
+                 return;
+            }
+
+            const expedienteData = {
+                numeroYAnio,
+                caratula,
+                fechaPase: formatearFecha(document.getElementById('fecha-pase').value),
+                juzgado: document.getElementById('juzgado').value,
+                modoIntervencion: document.getElementById('modo-intervencion').value,
+                descripcion: document.getElementById('descripcion-tarea').value.trim(),
+                controlSecretario: controlSecretarioSelect.value,
+                fechaFirmaDigital: formatearFecha(document.getElementById('fecha-firma-digital').value),
+                firmaSecretario: firmaSecretarioSelect.value,
+                secretario: firmaSecretarioSelect.value === 'si' ? secretarioSelect.value : '',
+                firmaDefensor: firmaSecretarioSelect.value === 'no' ? firmaDefensorSelect.value : '',
+                subroganteTexto: (firmaSecretarioSelect.value === 'no' && firmaDefensorSelect.value === 'Defensor Subrogante') ? subroganteTextoInput.value.trim() : '',
+                notas: [...notasTemporales]
+            };
+            
+            if (expedienteData.firmaDefensor === 'Defensor Subrogante' && !expedienteData.subroganteTexto && !subroganteTextoInput.disabled) {
+                alert('Por favor, especifique el nombre del subrogante.');
+                return;
+            }
+
+            try {
+                registroGuardarBtn.disabled = true;
+                registroGuardarBtn.textContent = 'Guardando...';
+
+                if (expedienteEditando) {
+                    await db.collection('expedientes').doc(expedienteEditando.id).update(expedienteData);
+                } else {
+                    await db.collection('expedientes').add(expedienteData);
+                }
+                
+                await cargarExpedientes();
+                cerrarModalRegistro();
+                mostrarAlerta('Expediente guardado correctamente.', 'success');
+            } catch (error) {
+                console.error('Error al guardar expediente:', error);
+                mostrarAlerta('Error al guardar el expediente.', 'danger');
+            } finally {
+                registroGuardarBtn.disabled = false;
+                registroGuardarBtn.textContent = 'Guardar';
+            }
+        }
+
+        function cerrarModal() { modal.style.display = 'none'; }
+        function cerrarModalRegistro() {
+            registroModal.style.display = 'none';
+            errorNumeroYAnio.style.display = 'none';
+        }
+
+        // --- Lógica de Notas ---
+        function actualizarTablaNotas() {
+            cuerpoTablaNotas.innerHTML = '';
+            const totalNotas = notasTemporales.length;
+            
+            if (totalNotas === 0) {
+                infoPaginacion.textContent = 'No hay notas';
+                controlesPaginacion.innerHTML = '';
+                return;
+            }
+            
+            const notasOrdenadas = [...notasTemporales].reverse();
+            const totalPaginas = Math.ceil(totalNotas / notasPorPagina);
+            paginaActualNotas = Math.min(paginaActualNotas, totalPaginas);
+            const inicio = (paginaActualNotas - 1) * notasPorPagina;
+            const fin = inicio + notasPorPagina;
+            
+            notasOrdenadas.slice(inicio, fin).forEach((nota, index) => {
+                const fila = cuerpoTablaNotas.insertRow();
+                const originalIndex = totalNotas - 1 - (inicio + index);
+                fila.innerHTML = `
+                    <td>${nota.fecha}</td>
+                    <td>${nota.texto}</td>
+                    <td><button class="btn-sm btn-danger eliminar-nota-btn" data-index="${originalIndex}">Eliminar</button></td>
+                `;
+            });
+            
+            infoPaginacion.textContent = `Mostrando ${inicio + 1}-${Math.min(fin, totalNotas)} de ${totalNotas} notas`;
+            renderizarControlesPaginacion(totalPaginas);
+
+            document.querySelectorAll('.eliminar-nota-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    notasTemporales.splice(parseInt(e.target.dataset.index, 10), 1);
+                    actualizarTablaNotas();
+                });
+            });
+        }
+        
+        function renderizarControlesPaginacion(totalPaginas) {
+            controlesPaginacion.innerHTML = '';
+            if (totalPaginas <= 1) return;
+            for (let i = 1; i <= totalPaginas; i++) {
+                const btnPagina = document.createElement('button');
+                btnPagina.className = `paginacion-btn ${i === paginaActualNotas ? 'active' : ''}`;
+                btnPagina.textContent = i;
+                btnPagina.addEventListener('click', () => {
+                    paginaActualNotas = i;
+                    actualizarTablaNotas();
+                });
+                controlesPaginacion.appendChild(btnPagina);
+            }
+        }
+
+        function agregarNota() {
+            const fecha = formatearFecha(fechaNotaInput.value);
+            const texto = textoNotaInput.value.trim();
+            if (!fecha || !texto) {
+                alert('Por favor, complete la fecha y el texto de la nota.');
+                return;
+            }
+            notasTemporales.push({ fecha, texto });
+            paginaActualNotas = Math.ceil(notasTemporales.length / notasPorPagina);
+            actualizarTablaNotas();
+            textoNotaInput.value = '';
+            textoNotaInput.focus();
+        }
+
+        // --- Login con Firebase Authentication ---
+        function validarLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login exitoso
+                    paginaInicio.style.display = 'none';
+                    paginaApp.style.display = 'block';
+                    cargarExpedientes();
+                    mostrarAlerta('Sesión iniciada correctamente', 'success');
+                })
+                .catch((error) => {
+                    console.error('Error de autenticación:', error);
+                    let errorMessage = 'Error al iniciar sesión';
+                    
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            errorMessage = 'El formato del correo electrónico es inválido';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'Esta cuenta ha sido deshabilitada';
+                            break;
+                        case 'auth/user-not-found':
+                            errorMessage = 'No existe una cuenta con este correo electrónico';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Contraseña incorrecta';
+                            break;
+                        default:
+                            errorMessage = 'Error al iniciar sesión. Intente nuevamente.';
+                    }
+                    
+                    mostrarAlerta(errorMessage, 'danger');
+                });
+        }
+
+        function cerrarSesion() {
+            if (confirm('¿Está seguro de que desea cerrar sesión?')) {
+                auth.signOut().then(() => {
+                    mostrarAlerta('Sesión cerrada correctamente', 'danger');
+                    setTimeout(() => {
+                        paginaApp.style.display = 'none';
+                        paginaInicio.style.display = 'flex';
+                        emailInput.value = '';
+                        passwordInput.value = '';
+                    }, 1500);
+                }).catch((error) => {
+                    console.error('Error al cerrar sesión:', error);
+                    mostrarAlerta('Error al cerrar sesión', 'danger');
+                });
+            }
+        }
+        
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configurar fecha actual por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            fechaNotaInput.value = hoy;
+            document.getElementById('fecha-pase').value = hoy;
+            
+            btnIngresar.addEventListener('click', validarLogin);
+            passwordInput.addEventListener('keypress', (e) => e.key === 'Enter' && validarLogin());
+            
+            closeModalBtns.forEach(btn => btn.addEventListener('click', () => {
+                cerrarModal();
+                cerrarModalRegistro();
+            }));
+            
+            modalCerrarBtn.addEventListener('click', cerrarModal);
+            registroCancelarBtn.addEventListener('click', cerrarModalRegistro);
+            registroGuardarBtn.addEventListener('click', guardarExpediente);
+            
+            // Reemplazar la función de impresión anterior
+            printBtn.addEventListener('click', imprimirListadoCompleto);
+            
+            reporteBtn.addEventListener('click', () => {
+                window.open('https://admindefensoria6.github.io/rf-causas/reporte.html', '_blank');
+            });
+            closeBtn.addEventListener('click', cerrarSesion);
+            
+            nuevoBtn.addEventListener('click', () => abrirModalRegistro());
+            
+            expedientesTbody.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+                
+                const id = target.dataset.id;
+                
+                if (target.classList.contains('ver-btn')) {
+                    abrirModalVer(id);
+                } else if (target.classList.contains('editar-btn')) {
+                    abrirModalRegistro(id);
+                } else if (target.classList.contains('eliminar-btn')) {
+                    if (confirm('¿Está seguro de que desea eliminar este expediente?')) {
+                        eliminarExpediente(id);
+                    }
+                }
+            });
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+            
+            controlSecretarioSelect.addEventListener('change', actualizarEstadoFirma);
+
+            firmaSecretarioSelect.addEventListener('change', function() {
+                if(this.disabled) return;
+                secretarioField.style.display = this.value === 'si' ? 'block' : 'none';
+                firmaDefensorField.style.display = this.value === 'no' ? 'block' : 'none';
+                firmaDefensorSelect.dispatchEvent(new Event('change'));
+            });
+            
+            firmaDefensorSelect.addEventListener('change', function() {
+                if(this.disabled) return;
+                 subroganteField.style.display = (this.value === 'Defensor Subrogante' && firmaSecretarioSelect.value === 'no') ? 'block' : 'none';
+            });
+            
+            agregarNotaBtn.addEventListener('click', agregarNota);
+            textoNotaInput.addEventListener('keypress', (e) => e.key === 'Enter' && (e.preventDefault(), agregarNota()));
+            
+            // AGREGAR NUEVOS FILTROS A LOS EVENT LISTENERS
+            const filtros = [searchInput, monthFilter, yearFilter, signatureFilter, controlFilter, juzgadoFilter, intervencionFilter];
+            
+            filtros.forEach(el => {
+                el.addEventListener('input', () => {
+                    paginaActualTabla = 1; // Reset a la primera página al filtrar
+                    mostrarExpedientesEnTabla();
+                });
+                el.addEventListener('change', () => {
+                    paginaActualTabla = 1; // Reset a la primera página al filtrar
+                    mostrarExpedientesEnTabla();
+                });
+            });
+            
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) cerrarModal();
+                if (e.target === registroModal) cerrarModalRegistro();
+            });
+        });
+    </script>
+</body>
+</html>
