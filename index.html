@@ -1214,17 +1214,11 @@
         // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyA4VNaoHo7W28gv6W6xYeEJD3_WuVdCpdE",
-
-  authDomain: "causas-bazante.firebaseapp.com",
-
-  projectId: "causas-bazante",
-
-  storageBucket: "causas-bazante.firebasestorage.app",
-
-  messagingSenderId: "963625595879",
-
-  appId: "1:963625595879:web:e7d442961028d08cab0342"
-
+            authDomain: "causas-bazante.firebaseapp.com",
+            projectId: "causas-bazante",
+            storageBucket: "causas-bazante.firebasestorage.app",
+            messagingSenderId: "963625595879",
+            appId: "1:963625595879:web:e7d442961028d08cab0342"
         };
 
         // Inicializar Firebase
@@ -1344,10 +1338,8 @@
             }
         }
 
-        function mostrarExpedientesEnTabla() {
-            expedientesTbody.innerHTML = '';
-            
-            const expedientesFiltrados = expedientes.filter(exp => {
+        function obtenerExpedientesFiltrados() {
+            return expedientes.filter(exp => {
                 const searchText = searchInput.value.toLowerCase();
                 const selectedMonth = monthFilter.value;
                 const selectedYear = yearFilter.value;
@@ -1384,6 +1376,12 @@
                 
                 return true;
             });
+        }
+
+        function mostrarExpedientesEnTabla() {
+            expedientesTbody.innerHTML = '';
+            
+            const expedientesFiltrados = obtenerExpedientesFiltrados();
             
             // Calcular paginación
             const totalExpedientes = expedientesFiltrados.length;
@@ -1537,20 +1535,20 @@
             controles.appendChild(btnSiguiente);
         }
         
-        // Función para imprimir el listado completo de expedientes
-        function imprimirListadoCompleto() {
+        // Función para imprimir el listado de expedientes (completo o filtrado)
+        function imprimirListado() {
+            // Obtener expedientes filtrados actuales
+            const expedientesAImprimir = obtenerExpedientesFiltrados();
+            
             // Crear una ventana nueva para imprimir
             const ventanaImpresion = window.open('', '_blank');
-            
-            // Obtener todos los expedientes sin filtrar
-            const expedientesCompletos = [...expedientes];
             
             // Crear el contenido HTML para la impresión
             let contenidoHTML = `
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Listado Completo de Expedientes</title>
+                    <title>Listado de Expedientes</title>
                     <style>
                         body {
                             font-family: Arial, sans-serif;
@@ -1584,7 +1582,7 @@
                     </style>
                 </head>
                 <body>
-                    <h1>Listado Completo de Expedientes</h1>
+                    <h1>Listado de Expedientes</h1>
                     <table>
                         <thead>
                             <tr>
@@ -1600,8 +1598,8 @@
             `;
             
             // Agregar cada expediente a la tabla
-            expedientesCompletos.forEach((exp, index) => {
-                const numeroDescendente = expedientesCompletos.length - index;
+            expedientesAImprimir.forEach((exp, index) => {
+                const numero = index + 1; // Numeración ascendente normal
                 
                 let observacionesTexto = '';
                 if (exp.notas && exp.notas.length > 0) {
@@ -1616,7 +1614,7 @@
                 
                 contenidoHTML += `
                     <tr>
-                        <td>${numeroDescendente}</td>
+                        <td>${numero}</td>
                         <td>${exp.fechaPase || 'N/A'}</td>
                         <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td>
                         <td>${exp.descripcion || 'N/A'}</td>
@@ -1983,7 +1981,7 @@
             registroGuardarBtn.addEventListener('click', guardarExpediente);
             
             // Reemplazar la función de impresión anterior
-            printBtn.addEventListener('click', imprimirListadoCompleto);
+            printBtn.addEventListener('click', imprimirListado);
             
             reporteBtn.addEventListener('click', () => {
                 window.open('https://admindefensoria6.github.io/rominabazante/reporte.html', '_blank');
