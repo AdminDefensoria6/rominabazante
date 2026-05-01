@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedientes Asignados - Ingreso</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <style>
+        /* =========================================
+           NUEVA LANDING PAGE MODERNA (SOLO LOGIN)
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            overflow-x: hidden;
+            color: #001f3f;
+        }
+
+        /* Créditos flotantes (se desvanece) */
+        #creditos-flotante {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #001f3f;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            animation: fadeIn 0.5s ease-out forwards;
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        .texto-autor {
+            font-size: 0.7rem;
+            font-weight: 400;
+        }
+
+        .texto-version {
+            font-size: 0.6rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transform: translateY(-20px) !important;
+        }
+
+        /* Contenedor principal landing */
+        .contenedor-principal {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Panel izquierdo (títulos + imagen animada) */
+        .panel-izquierdo {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            position: relative;
+            padding: 0 5%;
+            background: radial-gradient(circle at 10% 50%, #f0faff 0%, #ffffff 100%);
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            z-index: 2;
+            max-width: 50%;
+        }
+
+        .titulo-principal {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 900;
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            margin-bottom: 20px;
+            color: #001f3f;
+        }
+
+        .subtitulo-azul {
+            font-size: 1.3rem;
+            color: #003366;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .info-institucional {
+            border-left: 4px solid #00BFFF;
+            padding-left: 20px;
+            font-size: 1.1rem;
+        }
+
+        .info-institucional p:first-child { font-weight: 700; color: #000; }
+
+        /* Imagen con anillo rotatorio */
+        .img-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        .img-wrapper {
+            position: relative;
+            display: inline-block;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite, softPulse 3s ease-in-out infinite;
+        }
+
+        .img-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #00ffff, #0044ff, #ff00cc, #00ffff);
+            opacity: 0.7;
+            z-index: -1;
+            animation: rotateRing 4s linear infinite;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+        }
+
+        .img-wrapper::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -25px;
+            right: -25px;
+            bottom: -25px;
+            border-radius: 50%;
+            background: conic-gradient(from 90deg, rgba(0,255,255,0.3), rgba(0,68,255,0.3), rgba(255,0,204,0.3), rgba(0,255,255,0.3));
+            z-index: -2;
+            animation: rotateRingReverse 6s linear infinite;
+            filter: blur(8px);
+        }
+
+        @keyframes rotateRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateRingReverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes softPulse {
+            0% { filter: drop-shadow(0 0 5px rgba(0,191,255,0.3)); }
+            50% { filter: drop-shadow(0 0 20px rgba(0,191,255,0.6)); }
+            100% { filter: drop-shadow(0 0 5px rgba(0,191,255,0.3)); }
+        }
+
+        .img-3d {
+            width: 100%;
+            max-width: 420px;
+            height: auto;
+            display: block;
+            border-radius: 50%;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .img-3d:hover {
+            transform: scale(1.02);
+        }
+
+        /* Cintas decorativas */
+        .panel-izquierdo::before,
+        .panel-izquierdo::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: #001f3f;
+            opacity: 0.20;
+        }
+        .panel-izquierdo::before { top: 30px; }
+        .panel-izquierdo::after { bottom: 30px; }
+
+        /* Panel derecho: Formulario de login */
+        .panel-derecho {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            box-shadow: -15px 0 50px rgba(0, 0, 0, 0.04);
+            z-index: 10;
+        }
+
+        .formulario-login {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .formulario-login h2 {
+            font-weight: 900;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            letter-spacing: -0.03em;
+            color: #001f3f;
+        }
+
+        .grupo-input {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .grupo-input label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .grupo-input input {
+            padding: 14px;
+            border: 1px solid #eef0f2;
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: #f8fafc;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .grupo-input input:focus {
+            outline: none;
+            border-color: #00BFFF;
+            box-shadow: 0 0 0 4px rgba(0, 191, 255, 0.1);
+        }
+
+        /* Checkbox mostrar contraseña */
+        .mostrar-clave {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .mostrar-clave input {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .btn-ingresar {
+            width: 100%;
+            padding: 16px;
+            background: #001f3f;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-ingresar:hover {
+            transform: translateY(-2px);
+            background: #002a53;
+        }
+
+        /* Responsive landing */
+        @media (max-width: 1024px) {
+            .contenedor-principal { flex-direction: column; height: auto; overflow-y: auto; }
+            .panel-izquierdo { flex: none; padding: 60px 20px; text-align: center; flex-direction: column; }
+            .brand-container { align-items: center; max-width: 100%; margin-bottom: 30px; }
+            .info-institucional { border-left: none; border-top: 3px solid #00BFFF; padding: 15px 0 0 0; }
+            .img-3d { max-width: 250px; margin-bottom: 20px; }
+            .panel-derecho { flex: none; padding: 40px 20px 80px 20px; }
+            .formulario-login h2 { text-align: center; }
+            .img-wrapper::before { top: -10px; left: -10px; right: -10px; bottom: -10px; }
+            .img-wrapper::after { top: -18px; left: -18px; right: -18px; bottom: -18px; }
+        }
+        
+        /* Alerta flotante */
+        .visual-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+        }
+        .visual-alert.show {
+            opacity: 1;
+            top: 40px;
+        }
+        .alert-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .alert-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="creditos-flotante">
+        <span class="texto-autor">Diseño y programación: Rómulo Fioravante</span>
+        <span class="texto-version">Versión 3.1.2026</span>
+    </div>
+
+    <div class="contenedor-principal">
+        <div class="panel-izquierdo">
+            <div class="brand-container">
+                <h1 class="titulo-principal">Expedientes<br>Asignados</h1>
+                <p class="subtitulo-azul">Defensoría Civil y Comercial N° 6</p>
+                <div class="info-institucional">
+                    <p>Ministerio Público de Misiones</p>
+                    <p>Agente: Nadia Romina Bazante</p>
+                </div>
+            </div>
+            <div class="img-container">
+                <div class="img-wrapper">
+                    <img src="https://github.com/sistema-secretarios/imagenes-sistema/blob/main/pc.png?raw=true" 
+                         alt="Sistema Digital" 
+                         class="img-3d">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-derecho">
+            <div class="formulario-login">
+                <h2>Iniciar Sesión</h2>
+                <div class="grupo-input">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="usuario@mpmisiones.gob.ar">
+                </div>
+                <div class="grupo-input">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" placeholder="Ingrese su contraseña">
+                </div>
+                <label class="mostrar-clave">
+                    <input type="checkbox" id="mostrarPassword"> Mostrar contraseña
+                </label>
+                <button class="btn-ingresar" id="btn-ingresar">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA4VNaoHo7W28gv6W6xYeEJD3_WuVdCpdE",
+            authDomain: "causas-bazante.firebaseapp.com",
+            projectId: "causas-bazante",
+            storageBucket: "causas-bazante.firebasestorage.app",
+            messagingSenderId: "963625595879",
+            appId: "1:963625595879:web:e7d442961028d08cab0342"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Elementos
+        const btnIngresar = document.getElementById('btn-ingresar');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const mostrarPasswordCheck = document.getElementById('mostrarPassword');
+
+        // Mostrar/ocultar contraseña
+        mostrarPasswordCheck.addEventListener('change', function() {
+            passwordInput.type = this.checked ? 'text' : 'password';
+        });
+
+        // Función de alerta rápida
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const alerta = document.createElement('div');
+            alerta.className = `visual-alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            document.body.appendChild(alerta);
+            setTimeout(() => alerta.classList.add('show'), 10);
+            setTimeout(() => {
+                alerta.classList.remove('show');
+                alerta.addEventListener('transitionend', () => alerta.remove());
+            }, 4000);
+        }
+
+        // Redirigir a app.html si ya hay sesión activa
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Ya está logueado, vamos directamente a la app
+                window.location.replace('app.html');
+            }
+        });
+
+        // Login
+        function validarLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!email || !password) {
+                mostrarAlerta('Por favor, complete todos los campos.', 'danger');
+                return;
+            }
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    // El redireccionamiento lo maneja auth.onAuthStateChanged automáticamente
+                })
+                .catch((error) => {
+                    console.error('Error de autenticación:', error);
+                    let errorMessage = 'Error al iniciar sesión';
+                    switch (error.code) {
+                        case 'auth/invalid-email': errorMessage = 'El formato del correo electrónico es inválido'; break;
+                        case 'auth/user-disabled': errorMessage = 'Esta cuenta ha sido deshabilitada'; break;
+                        case 'auth/user-not-found': errorMessage = 'No existe una cuenta con este correo electrónico'; break;
+                        case 'auth/wrong-password': errorMessage = 'Contraseña incorrecta'; break;
+                        default: errorMessage = 'Error al iniciar sesión. Intente nuevamente.';
+                    }
+                    mostrarAlerta(errorMessage, 'danger');
+                });
+        }
+
+        btnIngresar.addEventListener('click', validarLogin);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') validarLogin();
+        });
+
+        // Desvanecer créditos flotantes
+        setTimeout(() => {
+            const flotante = document.getElementById('creditos-flotante');
+            if(flotante) {
+                flotante.classList.add('fade-out');
+                setTimeout(() => flotante.remove(), 1000);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
