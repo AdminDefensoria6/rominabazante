@@ -10,45 +10,52 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <style>
-        /* Estilos generales */
+        /* Estilos generales y variables */
+        :root {
+            --primary: #0f4c75;
+            --primary-hover: #1b6ca8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
+            --info: #0ea5e9;
+            --info-hover: #0284c7;
+            --bg-color: #f1f5f9;
+            --surface: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        .form-group select, .form-group textarea, .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            background-color: white;
-            color: #333;
-            font-size: 1rem;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        
-        .form-group input:disabled, .form-group select:disabled, .form-group textarea:disabled {
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-
         /* Página de aplicación */
         #pagina-app {
-            display: none; /* Se oculta inicialmente hasta validar la sesión */
+            display: none; 
         }
 
         /* Encabezado */
@@ -56,158 +63,180 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 25px;
+            padding: 15px 25px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
         }
 
         .app-title {
-            font-size: 2.2rem;
-            font-weight: 300;
-            color: #0f4c75;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
         .header-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
+        }
+
+        .user-greeting {
+            margin-right: 15px; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            font-size: 1rem;
         }
 
         .btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.3s;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
         }
 
-        .btn-success {
-            background-color: #1e7b34;
-            color: white;
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover { background-color: var(--success-hover); }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+
+        .btn-secondary { background-color: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+
+        /* Estructura Principal (Grid/Flex Layout) */
+        .main-layout {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
         }
 
-        .btn-success:hover {
-            background-color: #28a745;
+        .table-section {
+            flex: 1;
+            min-width: 0; /* Previene overflow en flexbox */
         }
 
-        .btn-primary {
-            background-color: #0f4c75;
-            color: white;
+        .filters-section {
+            width: 320px;
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+            position: sticky;
+            top: 25px;
         }
 
-        .btn-primary:hover {
-            background-color: #1b6ca8;
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
+        .filters-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
         }
 
         /* Panel de filtros */
         .filters {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
             display: flex;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            flex-wrap: wrap;
-            align-items: center;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .filters input, .filters select {
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .filters input:focus, .filters select:focus {
+            outline: none;
+            border-color: var(--primary);
             background-color: white;
-            color: #333;
-            flex: 1;
-            min-width: 150px;
-            max-width: 200px;
+            box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.15);
         }
 
         /* Tabla de expedientes */
         .table-container {
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             margin-bottom: 20px;
             overflow-x: auto;
+            border: 1px solid var(--border);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1100px;
+            min-width: 1000px;
         }
 
         th, td {
-            padding: 15px;
+            padding: 16px 20px;
             text-align: left;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
 
         th {
-            background-color: #0f4c75;
-            color: white;
-            font-weight: 500;
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         th:first-child, td:first-child {
-            width: 50px;
-            max-width: 50px;
-            min-width: 50px;
+            width: 60px;
             text-align: center;
         }
 
-        tr:hover {
-            background-color: #f8f9fa;
+        tr:hover td {
+            background-color: #f8fafc;
         }
         
         td:last-child {
             display: flex;
-            gap: 5px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .btn-sm {
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 0.85rem;
+            font-weight: 500;
             border: none;
-            border-radius: 3px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .btn-success-sm {
-            background-color: #1e7b34;
-            color: white;
-        }
+        .btn-success-sm { background-color: #d1fae5; color: #065f46; }
+        .btn-danger-sm { background-color: #fee2e2; color: #991b1b; }
+        .btn-info { background-color: #e0f2fe; color: #0369a1; }
+        .btn-info:hover { background-color: #bae6fd; }
+        .btn-warning { background-color: #fef3c7; color: #92400e; }
+        .btn-warning:hover { background-color: #fde68a; }
+        .btn-danger.eliminar-btn { background-color: #fee2e2; color: #991b1b; }
+        .btn-danger.eliminar-btn:hover { background-color: #fecaca; }
 
-        .btn-danger-sm {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-info {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .btn-warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        /* Modal */
+        /* Modales */
         .modal {
             display: none;
             position: fixed;
@@ -215,433 +244,320 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
         .modal-content {
-            background-color: white;
-            width: 90%;
+            background-color: var(--surface);
+            width: 100%;
             max-width: 600px;
-            border-radius: 10px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow-lg);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-header {
-            background-color: #0f4c75;
-            padding: 15px 20px;
+            background-color: white;
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .modal-header h2 {
-            font-weight: 400;
-            color: white;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin: 0;
         }
 
         .close-modal {
             background: none;
             border: none;
-            color: white;
-            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1.8rem;
             cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
         }
 
         .modal-body {
-            padding: 20px;
-            max-height: 70vh;
+            padding: 25px;
+            max-height: calc(100vh - 200px);
             overflow-y: auto;
         }
 
-        .info-group {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .info-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #0f4c75;
-        }
-
-        .info-value {
-            color: #333;
-        }
-
         .modal-footer {
-            padding: 15px 20px;
-            background-color: rgba(0, 0, 0, 0.05);
+            padding: 15px 25px;
+            background-color: #f8fafc;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 12px;
         }
 
         .modal-registro {
-            max-width: 800px;
+            max-width: 850px;
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
+        /* Detalles Ver Modal */
+        .info-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border);
+        }
+        .info-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .info-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Formularios */
+        .form-group {
             margin-bottom: 20px;
         }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #e9ecef;
-            border: none;
-            color: #333;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background-color: #0f4c75;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
+        
+        .form-group label {
             display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
         }
 
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
+        .form-group select, .form-group textarea, .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background-color: white;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.15);
+        }
+        
+        .form-group input:disabled, .form-group select:disabled, .form-group textarea:disabled {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+            color: #94a3b8;
         }
 
         .form-row {
             display: flex;
-            gap: 15px;
+            gap: 20px;
         }
 
         .form-row .form-group {
             flex: 1;
         }
 
-        .conditional-field {
-            display: none;
-            margin-top: 10px;
-        }
-
-        .notas-container {
-            margin-bottom: 15px;
-        }
-
-        .notas-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .notas-table th, .notas-table td {
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            text-align: left;
-        }
-
-        .notas-table th {
-            background-color: #e9ecef;
-            font-weight: 500;
-        }
-
-        .notas-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        
-        .notas-table td:last-child {
-            display: table-cell;
-            text-align: left;
-        }
-
-        .agregar-nota {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .agregar-nota input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-
-        .agregar-nota button {
-            padding: 8px 15px;
-            background-color: #0f4c75;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .paginacion {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .paginacion-info {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        .paginacion-controles {
+        /* Tabs Modernos */
+        .tabs {
             display: flex;
             gap: 5px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 25px;
         }
 
-        .paginacion-btn {
-            padding: 5px 10px;
-            border: 1px solid #ced4da;
-            background-color: white;
-            border-radius: 3px;
+        .tab {
+            padding: 12px 20px;
             cursor: pointer;
-        }
-
-        .paginacion-btn.active {
-            background-color: #0f4c75;
-            color: white;
-            border-color: #0f4c75;
-        }
-
-        .paginacion-btn:disabled {
-            background-color: #e9ecef;
-            color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .visual-alert {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 25px;
-            border-radius: 8px;
-            font-weight: 500;
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            opacity: 0;
-            transition: opacity 0.5s, top 0.5s;
-        }
-
-        .visual-alert.show {
-            opacity: 1;
-            top: 40px;
-        }
-        
-        .alert-success {
-            background-color: #28a745;
-            color: white;
-            border: 1px solid #1e7b34;
-        }
-
-        .alert-danger {
-            background-color: #dc3545;
-            color: white;
-            border: 1px solid #c82333;
-        }
-        
-        .alert-warning {
-            background-color: #ffc107;
-            color: #212529;
-            border: 1px solid #e0a800;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .date-input-container {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .date-input-container input[type="date"] {
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            width: 100%;
-            background-color: white;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
             background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+            background-color: #f8fafc;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: '';
             position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
         }
 
-        /* Responsive App */
-        @media (max-width: 768px) {
-            .app-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .header-buttons {
-                width: 100%;
-                justify-content: flex-start;
-            }
-            
-            .filters {
-                flex-direction: column;
-            }
-            
-            .filters input, .filters select {
-                max-width: 100%;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-            
-            .agregar-nota {
-                flex-direction: column;
-            }
-            
-            .paginacion {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .table-container {
-                font-size: 0.9rem;
-            }
-            
-            th:first-child, td:first-child {
-                width: 40px;
-                max-width: 40px;
-                min-width: 40px;
-                padding: 10px 5px;
-            }
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .conditional-field { display: none; margin-top: 15px; padding-left: 15px; border-left: 3px solid var(--primary); }
+
+        /* Notas */
+        .notas-table th { background-color: #f8fafc; }
+        .agregar-nota { display: flex; gap: 15px; margin-top: 20px; }
+        .agregar-nota input { flex: 1; }
+        .agregar-nota button { flex-shrink: 0; }
+
+        /* Paginación Tablas */
         .tabla-paginacion {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 15px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
         }
 
-        .tabla-paginacion-info {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        .tabla-paginacion-controles {
-            display: flex;
-            gap: 5px;
-        }
+        .tabla-paginacion-info { color: var(--text-muted); font-size: 0.95rem; }
+        .tabla-paginacion-controles { display: flex; gap: 5px; }
 
         .tabla-paginacion-btn {
-            padding: 5px 10px;
-            border: 1px solid #ced4da;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
             background-color: white;
-            border-radius: 3px;
+            border-radius: var(--radius-md);
             cursor: pointer;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
         }
 
-        .tabla-paginacion-btn.active {
-            background-color: #0f4c75;
-            color: white;
-            border-color: #0f4c75;
+        .tabla-paginacion-btn:hover:not(:disabled) { background-color: #f1f5f9; }
+        .tabla-paginacion-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+        .tabla-paginacion-btn:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+
+        /* Alertas visuales Toast */
+        .visual-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            z-index: 9999;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .visual-alert.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        
+        .alert-success { background-color: #ecfdf5; color: #065f46; border-left: 4px solid var(--success); }
+        .alert-danger { background-color: #fef2f2; color: #991b1b; border-left: 4px solid var(--danger); }
+        
+        .error-message { color: var(--danger); font-size: 0.85rem; margin-top: 5px; display: none; }
+        
+        .date-input-container { position: relative; width: 100%; }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent; bottom: 0; color: transparent; cursor: pointer; height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
         }
 
-        .tabla-paginacion-btn:disabled {
-            background-color: #e9ecef;
-            color: #6c757d;
-            cursor: not-allowed;
+        /* Modal de Alerta Pequeño */
+        #alert-modal .modal-content, #logout-alert-modal .modal-content {
+            border-top: 5px solid var(--danger);
+        }
+        #alert-modal .modal-header, #logout-alert-modal .modal-header {
+            background-color: #fef2f2;
+            border-bottom: none;
+            padding-bottom: 10px;
+        }
+        #alert-modal .modal-header h2, #logout-alert-modal .modal-header h2 {
+            color: #991b1b;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            .filters-section {
+                width: 100%;
+                position: static;
+                margin-bottom: 20px;
+            }
+            .filters {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .filters input, .filters select {
+                flex: 1;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            .header-buttons {
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            .user-greeting { width: 100%; text-align: center; margin-bottom: 10px; }
+            .form-row { flex-direction: column; gap: 0; }
+            .agregar-nota { flex-direction: column; }
         }
 
         @media print {
-            .app-header,
-            .filters,
-            .tabla-paginacion,
-            td:last-child,
-            .header-buttons,
-            .btn {
-                display: none !important;
-            }
-            
-            #pagina-app {
-                display: block !important;
-            }
-            
-            .container {
-                max-width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .table-container {
-                box-shadow: none;
-                border-radius: 0;
-                margin-bottom: 0;
-            }
-            
-            table {
-                min-width: 100%;
-                width: 100%;
-                border: 1px solid #000;
-            }
-            
-            th, td {
-                border: 1px solid #000;
-                padding: 8px;
-            }
-            
-            th {
-                background-color: #f0f0f0 !important;
-                color: #000 !important;
-                font-weight: bold;
-            }
-            
-            body {
-                background-color: white;
-                margin: 0;
-                padding: 10px;
-                font-size: 12px;
-            }
-            
-            * {
-                box-shadow: none !important;
-                text-shadow: none !important;
-            }
+            .app-header, .filters-section, .tabla-paginacion, td:last-child, .no-print { display: none !important; }
+            .main-layout { display: block; }
+            .table-section { width: 100%; }
+            body { background: white; padding: 0; }
+            .container { padding: 0; max-width: 100%; }
+            .table-container { border: none; box-shadow: none; }
+            table, th, td { border: 1px solid black; }
         }
     </style>
 </head>
 <body>
-    <div id="loading-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 1.5rem; color: #0f4c75;">
-        Cargando datos...
+    <div id="loading-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 1.5rem; color: var(--primary); font-weight: 500;">
+        Cargando datos del sistema...
     </div>
 
     <div id="pagina-app">
@@ -649,161 +565,170 @@
             <div class="app-header">
                 <h1 class="app-title">Expedientes Asignados</h1>
                 <div class="header-buttons">
-                    <span style="margin-right: 15px; color: #0f4c75; font-weight: 500; font-size: 1.1rem;">Hola, Nadia Romina Bazante</span>
+                    <span class="user-greeting">Hola, Nadia Romina Bazante</span>
                     <button class="btn btn-success" id="nuevo-btn">Nuevo Expediente</button>
-                    <button class="btn btn-primary" id="reporte-btn">Reporte</button>
-                    <button class="btn btn-primary" id="print-btn">Imprimir Listado</button>
+                    <button class="btn btn-secondary" id="reporte-btn">Reporte</button>
+                    <button class="btn btn-secondary" id="print-btn">Imprimir Listado</button>
                     <button class="btn btn-danger" id="logout-btn">Cerrar Sesión</button>
                 </div>
             </div>
 
-            <!-- VISTA PRINCIPAL CON TABLA Y FILTROS -->
-            <div id="vista-principal">
-                <div class="filters">
-                    <input type="text" id="search" placeholder="Buscar en registros...">
-                    <select id="month-filter">
-                        <option value="">Todos los meses</option>
-                        <option value="01">Enero</option>
-                        <option value="02">Febrero</option>
-                        <option value="03">Marzo</option>
-                        <option value="04">Abril</option>
-                        <option value="05">Mayo</option>
-                        <option value="06">Junio</option>
-                        <option value="07">Julio</option>
-                        <option value="08">Agosto</option>
-                        <option value="09">Septiembre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
-                    </select>
-                    <select id="year-filter">
-                        <option value="" selected>Todos los años</option>
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                        <option value="2029">2029</option>
-                        <option value="2030">2030</option>
-                    </select>
-                    <select id="signature-filter">
-                        <option value="">Todas las firmas</option>
-                        <option value="Secretario">Secretario</option>
-                        <option value="Defensor Titular">Defensor Titular</option>
-                        <option value="Defensor Subrogante">Defensor Subrogante</option>
-                    </select>
-                    <select id="control-filter">
-                        <option value="">Todos los controles</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="En control">En control</option>
-                        <option value="Completado el control">Completado</option>
-                    </select>
-                    <select id="juzgado-filter">
-                        <option value="">Todos los juzgados</option>
-                        <optgroup label="Administrativo">
-                            <option value="CEJUME - Posadas">CEJUME - Posadas</option>
-                            <option value="DEUT Defensorias - Posadas">DEUT Defensorias - Posadas</option>
-                            <option value="Legajo Defensoria Civil y Comercial N° 6">Legajo Defensoria Civil y Comercial N° 6</option>
-                        </optgroup>
-                        <optgroup label="Civil">
-                            <option value="Juzgado Civil y Comercial N° 1 - Posadas">Juzgado Civil y Comercial N° 1 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 2 - Posadas">Juzgado Civil y Comercial N° 2 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 3 - Posadas">Juzgado Civil y Comercial N° 3 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 4 - Posadas">Juzgado Civil y Comercial N° 4 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 5 - Posadas">Juzgado Civil y Comercial N° 5 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 6 - Posadas">Juzgado Civil y Comercial N° 6 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 7 - Posadas">Juzgado Civil y Comercial N° 7 - Posadas</option>
-                            <option value="Juzgado Civil y Comercial N° 8 - Posadas">Juzgado Civil y Comercial N° 8 - Posadas</option>
-                            <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
-                        </optgroup>
-                        <optgroup label="Penal">
-                            <option value="Juzgado de Instrucción N° 1 - Posadas">Juzgado de Instrucción N° 1 - Posadas</option>
-                            <option value="Juzgado de Instrucción N° 2 - Posadas">Juzgado de Instrucción N° 2 - Posadas</option>
-                            <option value="Juzgado de Instrucción N° 3 - Posadas">Juzgado de Instrucción N° 3 - Posadas</option>
-                            <option value="Juzgado de Instrucción N° 6 - Posadas">Juzgado de Instrucción N° 6 - Posadas</option>
-                            <option value="Juzgado de Instrucción N° 7 - Posadas">Juzgado de Instrucción N° 7 - Posadas</option>
-                            <option value="Juzgado Correccional y de Menores N° 1 - Posadas">Juzgado Correccional y de Menores N° 1 - Posadas</option>
-                            <option value="Juzgado Correccional y de Menores N° 2 - Posadas">Juzgado Correccional y de Menores N° 2 - Posadas</option>
-                            <option value="Tribunal Penal N° 1 - Posadas">Tribunal Penal N° 1 - Posadas</option>
-                            <option value="Tribunal Penal N° 2 - Posadas">Tribunal Penal N° 2 - Posadas</option>
-                        </optgroup>
-                        <optgroup label="Laboral">
-                            <option value="Juzgado Laboral N° 1 - Posadas">Juzgado Laboral N° 1 - Posadas</option>
-                            <option value="Juzgado Laboral N° 2 - Posadas">Juzgado Laboral N° 2 - Posadas</option>
-                            <option value="Juzgado Laboral N° 3 - Posadas">Juzgado Laboral N° 3 - Posadas</option>
-                            <option value="Juzgado Laboral N° 4 - Posadas">Juzgado Laboral N° 4 - Posadas</option>
-                        </optgroup>
-                        <optgroup label="Familia">
-                            <option value="Juzgado de Familia N° 1 - Posadas">Juzgado de Familia N° 1 - Posadas</option>
-                            <option value="Juzgado de Familia N° 2 - Posadas">Juzgado de Familia N° 2 - Posadas</option>
-                            <option value="Juzgado de Familia N° 3 - Posadas">Juzgado de Familia N° 3 - Posadas</option>
-                            <option value="Juzgado Familia y VF Garupa">Juzgado Familia y VF Garupa</option>
-                            <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
-                        </optgroup>
-                        <optgroup label="Violencia Familiar">
-                            <option value="Juzgado de Violencia Familiar N° 1 - Posadas">Juzgado de Violencia Familiar N° 1 - Posadas</option>
-                            <option value="Juzgado de Violencia Familiar N° 2 - Posadas">Juzgado de Violencia Familiar N° 2 - Posadas</option>
-                            <option value="Juzgado F y Violencia Familiar Garupa">Juzgado F y Violencia Familiar Garupa</option>
-                            <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
-                        </optgroup>
-                        <optgroup label="Paz">
-                            <option value="Juzgado de Paz Civil Comercial N° 1 - Posadas">Juzgado de Paz Civil Comercial N° 1 - Posadas</option>
-                            <option value="Juzgado de Paz Civil Comercial N° 2 - Posadas">Juzgado de Paz Civil Comercial N° 2 - Posadas</option>
-                            <option value="Juzgado de Paz de Itaembe Mini - Posadas">Juzgado de Paz de Itaembe Mini - Posadas</option>
-                            <option value="Juzgado de Paz de Itaembe Guazu - Posadas">Juzgado de Paz de Itaembe Guazu - Posadas</option>
-                            <option value="Juzgado de Paz de Villa Cabello - Posadas">Juzgado de Paz de Villa Cabello - Posadas</option>
-                            <option value="Juzgado de Paz de Garupa">Juzgado de Paz de Garupa</option>
-                            <option value="Juzgado de Paz de Fatima - Garupa">Juzgado de Paz de Fatima - Garupa</option>
-                            <option value="Juzgado de Paz de Apostoles">Juzgado de Paz de Apostoles</option>
-                            <option value="Juzgado de Paz de Candelaria">Juzgado de Paz de Candelaria</option>
-                        </optgroup>
-                    </select>
-                    <select id="intervencion-filter">
-                        <option value="">Todas las intervenciones</option>
-                        <option value="Ministerio Complementario">Ministerio Complementario</option>
-                        <option value="Ministerio Principal">Ministerio Principal</option>
-                        <option value="Patrocinante Actor">Patrocinante Actor</option>
-                        <option value="Patrocinante Demandado">Patrocinante Demandado</option>
-                        <option value="Patrocinante Tercero">Patrocinante Tercero</option>
-                        <option value="Defensor de Ausente">Defensor de Ausente</option>
-                        <option value="Defensor MPC Incapaz">Defensor MPC Incapaz</option>
-                        <option value="Asesor de incapaces">Asesor de incapaces</option>
-                    </select>
-                </div>
+            <!-- VISTA PRINCIPAL CON LAYOUT DIVIDIDO -->
+            <div id="vista-principal" class="main-layout">
+                
+                <!-- COLUMNA IZQUIERDA: TABLA -->
+                <div class="table-section">
+                    <div class="tabla-paginacion" id="tabla-paginacion-superior">
+                        <div class="tabla-paginacion-info" id="tabla-paginacion-info-superior">Mostrando 0-0 de 0 expedientes</div>
+                        <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-superior"></div>
+                    </div>
 
-                <div class="tabla-paginacion" id="tabla-paginacion-superior">
-                    <div class="tabla-paginacion-info" id="tabla-paginacion-info-superior">Mostrando 0-0 de 0 expedientes</div>
-                    <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-superior"></div>
-                </div>
-
-                <div class="table-container">
-                    <table id="expedientes-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Fecha de pase</th>
-                                <th>Expediente y Carátula</th>
-                                <th>Descripción</th>
-                                <th>Firma Digital</th>
-                                <th>Observaciones</th>
-                                <th class="no-print">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expedientes-tbody">
+                    <div class="table-container">
+                        <table id="expedientes-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha de pase</th>
+                                    <th>Expediente y Carátula</th>
+                                    <th>Descripción</th>
+                                    <th>Firma Digital</th>
+                                    <th>Observaciones</th>
+                                    <th class="no-print">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expedientes-tbody">
+                                <!-- Datos cargados por JS -->
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
+
+                    <div class="tabla-paginacion" id="tabla-paginacion-inferior">
+                        <div class="tabla-paginacion-info" id="tabla-paginacion-info-inferior">Mostrando 0-0 de 0 expedientes</div>
+                        <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-inferior"></div>
+                    </div>
                 </div>
 
-                <div class="tabla-paginacion" id="tabla-paginacion-inferior">
-                    <div class="tabla-paginacion-info" id="tabla-paginacion-info-inferior">Mostrando 0-0 de 0 expedientes</div>
-                    <div class="tabla-paginacion-controles" id="tabla-paginacion-controles-inferior"></div>
+                <!-- COLUMNA DERECHA: FILTROS -->
+                <div class="filters-section">
+                    <h3 class="filters-title">Filtros de Búsqueda</h3>
+                    <div class="filters">
+                        <input type="text" id="search" placeholder="Buscar en registros...">
+                        <select id="month-filter">
+                            <option value="">Todos los meses</option>
+                            <option value="01">Enero</option>
+                            <option value="02">Febrero</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Mayo</option>
+                            <option value="06">Junio</option>
+                            <option value="07">Julio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <select id="year-filter">
+                            <option value="" selected>Todos los años</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+                        <select id="signature-filter">
+                            <option value="">Todas las firmas</option>
+                            <option value="Secretario">Secretario</option>
+                            <option value="Defensor Titular">Defensor Titular</option>
+                            <option value="Defensor Subrogante">Defensor Subrogante</option>
+                        </select>
+                        <select id="control-filter">
+                            <option value="">Todos los controles</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En control">En control</option>
+                            <option value="Completado el control">Completado</option>
+                        </select>
+                        <select id="juzgado-filter">
+                            <option value="">Todos los juzgados</option>
+                            <optgroup label="Administrativo">
+                                <option value="CEJUME - Posadas">CEJUME - Posadas</option>
+                                <option value="DEUT Defensorias - Posadas">DEUT Defensorias - Posadas</option>
+                                <option value="Legajo Defensoria Civil y Comercial N° 6">Legajo Defensoria Civil y Comercial N° 6</option>
+                            </optgroup>
+                            <optgroup label="Civil">
+                                <option value="Juzgado Civil y Comercial N° 1 - Posadas">Juzgado Civil y Comercial N° 1 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 2 - Posadas">Juzgado Civil y Comercial N° 2 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 3 - Posadas">Juzgado Civil y Comercial N° 3 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 4 - Posadas">Juzgado Civil y Comercial N° 4 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 5 - Posadas">Juzgado Civil y Comercial N° 5 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 6 - Posadas">Juzgado Civil y Comercial N° 6 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 7 - Posadas">Juzgado Civil y Comercial N° 7 - Posadas</option>
+                                <option value="Juzgado Civil y Comercial N° 8 - Posadas">Juzgado Civil y Comercial N° 8 - Posadas</option>
+                                <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                            </optgroup>
+                            <optgroup label="Penal">
+                                <option value="Juzgado de Instrucción N° 1 - Posadas">Juzgado de Instrucción N° 1 - Posadas</option>
+                                <option value="Juzgado de Instrucción N° 2 - Posadas">Juzgado de Instrucción N° 2 - Posadas</option>
+                                <option value="Juzgado de Instrucción N° 3 - Posadas">Juzgado de Instrucción N° 3 - Posadas</option>
+                                <option value="Juzgado de Instrucción N° 6 - Posadas">Juzgado de Instrucción N° 6 - Posadas</option>
+                                <option value="Juzgado de Instrucción N° 7 - Posadas">Juzgado de Instrucción N° 7 - Posadas</option>
+                                <option value="Juzgado Correccional y de Menores N° 1 - Posadas">Juzgado Correccional y de Menores N° 1 - Posadas</option>
+                                <option value="Juzgado Correccional y de Menores N° 2 - Posadas">Juzgado Correccional y de Menores N° 2 - Posadas</option>
+                                <option value="Tribunal Penal N° 1 - Posadas">Tribunal Penal N° 1 - Posadas</option>
+                                <option value="Tribunal Penal N° 2 - Posadas">Tribunal Penal N° 2 - Posadas</option>
+                            </optgroup>
+                            <optgroup label="Laboral">
+                                <option value="Juzgado Laboral N° 1 - Posadas">Juzgado Laboral N° 1 - Posadas</option>
+                                <option value="Juzgado Laboral N° 2 - Posadas">Juzgado Laboral N° 2 - Posadas</option>
+                                <option value="Juzgado Laboral N° 3 - Posadas">Juzgado Laboral N° 3 - Posadas</option>
+                                <option value="Juzgado Laboral N° 4 - Posadas">Juzgado Laboral N° 4 - Posadas</option>
+                            </optgroup>
+                            <optgroup label="Familia">
+                                <option value="Juzgado de Familia N° 1 - Posadas">Juzgado de Familia N° 1 - Posadas</option>
+                                <option value="Juzgado de Familia N° 2 - Posadas">Juzgado de Familia N° 2 - Posadas</option>
+                                <option value="Juzgado de Familia N° 3 - Posadas">Juzgado de Familia N° 3 - Posadas</option>
+                                <option value="Juzgado Familia y VF Garupa">Juzgado Familia y VF Garupa</option>
+                                <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                            </optgroup>
+                            <optgroup label="Violencia Familiar">
+                                <option value="Juzgado de Violencia Familiar N° 1 - Posadas">Juzgado de Violencia Familiar N° 1 - Posadas</option>
+                                <option value="Juzgado de Violencia Familiar N° 2 - Posadas">Juzgado de Violencia Familiar N° 2 - Posadas</option>
+                                <option value="Juzgado F y Violencia Familiar Garupa">Juzgado F y Violencia Familiar Garupa</option>
+                                <option value="... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles">... Civil Comercial Laboral Familia y Violencia Fliar- Apostoles</option>
+                            </optgroup>
+                            <optgroup label="Paz">
+                                <option value="Juzgado de Paz Civil Comercial N° 1 - Posadas">Juzgado de Paz Civil Comercial N° 1 - Posadas</option>
+                                <option value="Juzgado de Paz Civil Comercial N° 2 - Posadas">Juzgado de Paz Civil Comercial N° 2 - Posadas</option>
+                                <option value="Juzgado de Paz de Itaembe Mini - Posadas">Juzgado de Paz de Itaembe Mini - Posadas</option>
+                                <option value="Juzgado de Paz de Itaembe Guazu - Posadas">Juzgado de Paz de Itaembe Guazu - Posadas</option>
+                                <option value="Juzgado de Paz de Villa Cabello - Posadas">Juzgado de Paz de Villa Cabello - Posadas</option>
+                                <option value="Juzgado de Paz de Garupa">Juzgado de Paz de Garupa</option>
+                                <option value="Juzgado de Paz de Fatima - Garupa">Juzgado de Paz de Fatima - Garupa</option>
+                                <option value="Juzgado de Paz de Apostoles">Juzgado de Paz de Apostoles</option>
+                                <option value="Juzgado de Paz de Candelaria">Juzgado de Paz de Candelaria</option>
+                            </optgroup>
+                        </select>
+                        <select id="intervencion-filter">
+                            <option value="">Todas las intervenciones</option>
+                            <option value="Ministerio Complementario">Ministerio Complementario</option>
+                            <option value="Ministerio Principal">Ministerio Principal</option>
+                            <option value="Patrocinante Actor">Patrocinante Actor</option>
+                            <option value="Patrocinante Demandado">Patrocinante Demandado</option>
+                            <option value="Patrocinante Tercero">Patrocinante Tercero</option>
+                            <option value="Defensor de Ausente">Defensor de Ausente</option>
+                            <option value="Defensor MPC Incapaz">Defensor MPC Incapaz</option>
+                            <option value="Asesor de incapaces">Asesor de incapaces</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- NUEVA VISTA PARA EL REPORTE -->
+            <!-- VISTA PARA EL REPORTE -->
             <div id="vista-reporte" style="display: none; margin-bottom: 20px;">
                 <div style="margin-bottom: 15px;">
-                    <button class="btn" id="cerrar-reporte-btn" style="background-color: #6c757d; color: white;">&larr; Volver a Expedientes</button>
+                    <button class="btn btn-secondary" id="cerrar-reporte-btn">&larr; Volver a Expedientes</button>
                 </div>
                 <iframe id="reporte-iframe" src="" style="width: 100%; height: 75vh; border: none; border-radius: 10px; background-color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);"></iframe>
             </div>
@@ -811,6 +736,7 @@
         </div>
     </div>
 
+    <!-- MODAL: VER DETALLES -->
     <div class="modal" id="expediente-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -864,15 +790,16 @@
                 </div>
                 <div class="info-group">
                     <div class="info-label">Observaciones</div>
-                    <div class="info-value" id="modal-observaciones"></div>
+                    <div class="info-value" id="modal-observaciones" style="font-size: 0.95rem; line-height: 1.5; padding-top: 10px;"></div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="modal-cerrar-btn">Cerrar</button>
+                <button class="btn btn-secondary" id="modal-cerrar-btn">Cerrar Detalle</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: REGISTRO / EDICIÓN -->
     <div class="modal" id="registro-modal">
         <div class="modal-content modal-registro">
             <div class="modal-header">
@@ -881,24 +808,25 @@
             </div>
             <div class="modal-body">
                 <div class="tabs">
-                    <button class="tab active" data-tab="datos-expediente">Datos del Expediente</button>
-                    <button class="tab" data-tab="detalle-tarea">Detalle de Tarea</button>
+                    <button class="tab active" data-tab="datos-expediente">Datos Principales</button>
+                    <button class="tab" data-tab="detalle-tarea">Detalles y Firma</button>
                     <button class="tab" data-tab="observaciones">Observaciones</button>
                 </div>
 
+                <!-- Tab 1 -->
                 <div class="tab-content active" id="datos-expediente">
                     <div class="form-group">
-                        <label for="numero-y-anio">Número y Año *</label>
+                        <label for="numero-y-anio">Número y Año <span style="color:red">*</span></label>
                         <input type="text" id="numero-y-anio" placeholder="Ej: 123/2024">
                         <div class="error-message" id="error-numero-y-anio">Este número de expediente ya existe.</div>
                     </div>
                     <div class="form-group">
-                        <label for="caratula-causa">Carátula de la causa *</label>
-                        <textarea id="caratula-causa" placeholder="Ingrese la carátula de la causa"></textarea>
+                        <label for="caratula-causa">Carátula de la causa <span style="color:red">*</span></label>
+                        <textarea id="caratula-causa" rows="3" placeholder="Ingrese la carátula de la causa"></textarea>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fecha-pase">Fecha de Pase *</label>
+                            <label for="fecha-pase">Fecha de Pase <span style="color:red">*</span></label>
                             <div class="date-input-container">
                                 <input type="date" id="fecha-pase">
                             </div>
@@ -906,7 +834,7 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="juzgado">Juzgado *</label>
+                            <label for="juzgado">Juzgado <span style="color:red">*</span></label>
                             <select id="juzgado">
                                 <option value="">Seleccionar Juzgado</option>
                                 <optgroup label="Administrativo">
@@ -969,7 +897,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="modo-intervencion">Modo de Intervención *</label>
+                            <label for="modo-intervencion">Modo de Intervención <span style="color:red">*</span></label>
                             <select id="modo-intervencion">
                                 <option value="">Seleccionar Modo</option>
                                 <option value="Ministerio Complementario">Ministerio Complementario</option>
@@ -985,14 +913,15 @@
                     </div>
                 </div>
 
+                <!-- Tab 2 -->
                 <div class="tab-content" id="detalle-tarea">
                     <div class="form-group">
-                        <label for="descripcion-tarea">Descripción *</label>
-                        <textarea id="descripcion-tarea"></textarea>
+                        <label for="descripcion-tarea">Descripción de la Tarea <span style="color:red">*</span></label>
+                        <textarea id="descripcion-tarea" rows="4"></textarea>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="control-secretario">Control de Secretario *</label>
+                            <label for="control-secretario">Control de Secretario <span style="color:red">*</span></label>
                             <select id="control-secretario">
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En control">En control</option>
@@ -1007,7 +936,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="firma-secretario">Firma Secretario *</label>
+                        <label for="firma-secretario">Firma Secretario <span style="color:red">*</span></label>
                         <select id="firma-secretario">
                             <option value="si">Sí</option>
                             <option value="no">No</option>
@@ -1015,7 +944,7 @@
                     </div>
                     <div class="conditional-field" id="secretario-field">
                         <div class="form-group">
-                            <label for="secretario-select">Secretario *</label>
+                            <label for="secretario-select">Seleccione Secretario <span style="color:red">*</span></label>
                             <select id="secretario-select">
                                 <option value="Dra Patricia Soledad Riveros">Dra Patricia Soledad Riveros</option>
                                 <option value="Dra Alicia Mariela Corrales">Dra Alicia Mariela Corrales</option>
@@ -1025,7 +954,7 @@
                     </div>
                     <div class="conditional-field" id="firma-defensor-field">
                         <div class="form-group">
-                            <label for="firma-defensor">Firma Defensor *</label>
+                            <label for="firma-defensor">Firma Defensor <span style="color:red">*</span></label>
                             <select id="firma-defensor">
                                 <option value="Defensor Titular">Defensor Titular</option>
                                 <option value="Defensor Subrogante">Defensor Subrogante</option>
@@ -1033,82 +962,85 @@
                         </div>
                         <div class="conditional-field" id="subrogante-field">
                             <div class="form-group">
-                                <label for="subrogante-texto">Especificar Subrogante *</label>
-                                <input type="text" id="subrogante-texto">
+                                <label for="subrogante-texto">Especificar Subrogante <span style="color:red">*</span></label>
+                                <input type="text" id="subrogante-texto" placeholder="Nombre del subrogante">
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Tab 3 -->
                 <div class="tab-content" id="observaciones">
                     <div class="form-group">
-                        <label>Notas de Observación</label>
+                        <label>Historial de Notas de Observación</label>
                         <div class="notas-container">
-                            <table class="notas-table">
+                            <table class="notas-table" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
                                 <thead>
                                     <tr>
-                                        <th>Fecha</th>
-                                        <th>Nota</th>
-                                        <th>Acciones</th>
+                                        <th style="padding:10px; border:1px solid #e2e8f0;">Fecha</th>
+                                        <th style="padding:10px; border:1px solid #e2e8f0; width: 60%;">Nota</th>
+                                        <th style="padding:10px; border:1px solid #e2e8f0;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cuerpo-tabla-notas">
-                                    </tbody>
+                                    <!-- Notas cargadas por JS -->
+                                </tbody>
                             </table>
-                            <div class="paginacion" id="paginacion-notas">
-                                <div class="paginacion-info" id="info-paginacion">Mostrando 0-0 de 0 notas</div>
-                                <div class="paginacion-controles" id="controles-paginacion">
-                                    </div>
+                            <div class="tabla-paginacion" id="paginacion-notas" style="margin-top:0;">
+                                <div class="tabla-paginacion-info" id="info-paginacion">Mostrando 0-0 de 0 notas</div>
+                                <div class="tabla-paginacion-controles" id="controles-paginacion"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="agregar-nota">
-                        <div class="date-input-container">
-                            <input type="date" id="fecha-nota">
+                    <div class="agregar-nota" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div class="date-input-container" style="width: 180px;">
+                            <input type="date" id="fecha-nota" style="width: 100%;">
                         </div>
-                        <input type="text" id="texto-nota" placeholder="Escriba una nota">
-                        <button id="agregar-nota-btn">Agregar</button>
+                        <input type="text" id="texto-nota" placeholder="Escriba una nueva nota..." style="flex:1;">
+                        <button id="agregar-nota-btn" class="btn btn-primary">Agregar Nota</button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="registro-cancelar-btn">Cancelar</button>
-                <button class="btn btn-success" id="registro-guardar-btn">Guardar</button>
+                <button class="btn btn-success" id="registro-guardar-btn">Guardar Expediente</button>
             </div>
         </div>
     </div>
 
+    <!-- MODALES DE ALERTA -->
     <div class="modal" id="alert-modal">
-        <div class="modal-content" style="max-width: 400px; border-top: 5px solid #dc3545;">
-            <div class="modal-header" style="background-color: #f8d7da;">
-                <h2 style="color: #721c24;">Atención</h2>
-                <button class="close-modal" style="color: #721c24;">&times;</button>
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>¡Atención!</h2>
+                <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="alert-modal-message">Por favor, complete todos los campos obligatorios (*)</p>
+                <p id="alert-modal-message" style="font-size: 1.05rem; color: #334155;">Por favor, complete todos los campos obligatorios (*)</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" id="alert-modal-btn">Aceptar</button>
+                <button class="btn btn-danger" id="alert-modal-btn">Entendido</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="logout-alert-modal">
-        <div class="modal-content" style="max-width: 400px; border-top: 5px solid #dc3545;">
-            <div class="modal-header" style="background-color: #f8d7da;">
-                <h2 style="color: #721c24;">Advertencia</h2>
-                <button class="close-modal" id="logout-close-btn" style="color: #721c24;">&times;</button>
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Cerrar Sesión</h2>
+                <button class="close-modal" id="logout-close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="font-weight: 500; color: #333;">Está cerrando sesión en la aplicación. ¿Desea continuar?</p>
+                <p style="font-size: 1.05rem; color: #334155;">Está a punto de cerrar sesión en la aplicación. ¿Desea continuar?</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="logout-cancel-btn">Cancelar</button>
-                <button class="btn btn-danger" id="logout-confirm-btn">Salir</button>
+                <button class="btn btn-secondary" id="logout-cancel-btn">Cancelar</button>
+                <button class="btn btn-danger" id="logout-confirm-btn">Sí, salir</button>
             </div>
         </div>
     </div>
 
+    <!-- SCRIPT ORIGINAL SIN MODIFICACIONES DE LÓGICA -->
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1123,7 +1055,7 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth(); // INICIALIZAR AUTH AQUÍ TAMBIÉN
+        const auth = firebase.auth(); 
 
         // Elementos DOM
         const paginaApp = document.getElementById('pagina-app');
@@ -1136,7 +1068,7 @@
         const printBtn = document.getElementById('print-btn');
         const reporteBtn = document.getElementById('reporte-btn');
         const nuevoBtn = document.getElementById('nuevo-btn');
-        const logoutBtn = document.getElementById('logout-btn'); // REFERENCIA AL BOTON DE SALIR
+        const logoutBtn = document.getElementById('logout-btn'); 
         const searchInput = document.getElementById('search');
         const monthFilter = document.getElementById('month-filter');
         const yearFilter = document.getElementById('year-filter');
@@ -1199,22 +1131,18 @@
         // ==========================================
         auth.onAuthStateChanged((user) => {
             if (!user) {
-                // Si NO hay sesión activa, redirigir al index.html
                 window.location.replace('index.html');
             } else {
-                // Si HAY sesión, ocultar pantalla de carga, mostrar app y cargar datos
                 loadingScreen.style.display = 'none';
                 paginaApp.style.display = 'block';
                 cargarExpedientes();
             }
         });
 
-        // Mostrar el modal de alerta de salida en lugar de confirmación nativa
         logoutBtn.addEventListener('click', () => {
             logoutAlertModal.style.display = 'flex';
         });
 
-        // Cerrar el modal sin hacer nada
         logoutCloseBtn.addEventListener('click', () => {
             logoutAlertModal.style.display = 'none';
         });
@@ -1222,17 +1150,14 @@
             logoutAlertModal.style.display = 'none';
         });
 
-        // Confirmar cierre de sesión
         logoutConfirmBtn.addEventListener('click', () => {
             logoutAlertModal.style.display = 'none';
             auth.signOut().then(() => {
-                // El redireccionamiento lo maneja onAuthStateChanged automáticamente
             }).catch((error) => {
                 console.error('Error al cerrar sesión:', error);
                 mostrarAlerta('Error al cerrar sesión', 'danger');
             });
         });
-        // ==========================================
 
         // --- Funciones de Utilidad ---
         function formatearFecha(fecha) {
@@ -1275,7 +1200,7 @@
         // --- Lógica de la Aplicación ---
         async function cargarExpedientes() {
             try {
-                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Cargando expedientes...</td></tr>`; 
+                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">Cargando expedientes...</td></tr>`; 
                 const querySnapshot = await db.collection('expedientes').get();
                 expedientes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
@@ -1344,7 +1269,7 @@
             
             if (expedientesPagina.length === 0) {
                 const message = expedientes.length === 0 ? "No hay expedientes registrados" : "No se encontraron expedientes con los filtros aplicados.";
-                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">${message}</td></tr>`; 
+                expedientesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">${message}</td></tr>`; 
             } else {
                 expedientesPagina.forEach((exp, index) => {
                     const row = expedientesTbody.insertRow();
@@ -1364,12 +1289,12 @@
                     row.innerHTML = `
                         <td>${numeroDescendente}</td>
                         <td>${exp.fechaPase || 'N/A'}</td>
-                        <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td>
+                        <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br><span style="font-size:0.85rem; color:#64748b;">${exp.caratula || 'N/A'}</span></td>
                         <td>${exp.descripcion || 'N/A'}</td>
                         <td>
-                            <button class="btn-sm ${firmaDigital === 'si' ? 'btn-success-sm' : 'btn-danger-sm'}" disabled>
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; display: inline-block; ${firmaDigital === 'si' ? 'background: #d1fae5; color: #065f46;' : 'background: #fee2e2; color: #991b1b;'}">
                                 ${firmaDigital === 'si' ? 'Sí' : 'No'}
-                            </button>
+                            </span>
                         </td>
                         <td>${observacionesTexto}</td>
                         <td class="no-print">
@@ -1472,7 +1397,6 @@
         
         function imprimirListado() {
             const ventanaImpresion = window.open('', '_blank');
-            
             const expedientesFiltrados = expedientes.filter(exp => {
                 const searchText = searchInput.value.toLowerCase();
                 const selectedMonth = monthFilter.value;
@@ -1481,37 +1405,23 @@
                 const selectedControl = controlFilter.value;
                 const selectedJuzgado = juzgadoFilter.value;
                 const selectedIntervencion = intervencionFilter.value;
-                
-                if (searchText && 
-                    !(exp.numeroYAnio?.toLowerCase().includes(searchText) ||
-                      exp.descripcion?.toLowerCase().includes(searchText) ||
-                      exp.caratula?.toLowerCase().includes(searchText))) {
-                    return false;
-                }
-                
+                if (searchText && !(exp.numeroYAnio?.toLowerCase().includes(searchText) || exp.descripcion?.toLowerCase().includes(searchText) || exp.caratula?.toLowerCase().includes(searchText))) return false;
                 const fechaParts = exp.fechaPase ? exp.fechaPase.split('/') : [];
                 if (fechaParts.length === 3) {
                     if (selectedMonth && fechaParts[1] !== selectedMonth) return false;
                     if (selectedYear && fechaParts[2] !== selectedYear) return false;
-                } else if (selectedMonth || selectedYear) {
-                    return false;
-                }
-                
+                } else if (selectedMonth || selectedYear) return false;
                 if (selectedSignature) {
                     const recordSignature = exp.firmaSecretario === 'si' ? 'Secretario' : exp.firmaDefensor;
                     if (recordSignature !== selectedSignature) return false;
                 }
-                
                 if (selectedControl && exp.controlSecretario !== selectedControl) return false;
                 if (selectedJuzgado && exp.juzgado !== selectedJuzgado) return false;
                 if (selectedIntervencion && exp.modoIntervencion !== selectedIntervencion) return false;
-                
                 return true;
             });
             
-            const hayFiltros = searchInput.value || monthFilter.value || yearFilter.value || 
-                               signatureFilter.value || controlFilter.value || 
-                               juzgadoFilter.value || intervencionFilter.value;
+            const hayFiltros = searchInput.value || monthFilter.value || yearFilter.value || signatureFilter.value || controlFilter.value || juzgadoFilter.value || intervencionFilter.value;
             
             let contenidoHTML = `
                 <!DOCTYPE html>
@@ -1519,42 +1429,14 @@
                 <head>
                     <title>Listado de Expedientes</title>
                     <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 20px;
-                            font-size: 12px;
-                        }
-                        h1 {
-                            text-align: center;
-                            color: #0f4c75;
-                            margin-bottom: 20px;
-                        }
-                        .info-filtros {
-                            background-color: #f0f0f0;
-                            padding: 10px;
-                            margin-bottom: 15px;
-                            border-radius: 5px;
-                            font-size: 11px;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                        }
-                        th, td {
-                            border: 1px solid #000;
-                            padding: 8px;
-                            text-align: left;
-                        }
-                        th {
-                            background-color: #f0f0f0;
-                            font-weight: bold;
-                        }
-                        tr:nth-child(even) {
-                            background-color: #f9f9f9;
-                        }
-                        .firma-digital {
-                            text-align: center;
-                        }
+                        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+                        h1 { text-align: center; color: #0f4c75; margin-bottom: 20px; }
+                        .info-filtros { background-color: #f0f0f0; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 11px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                        th { background-color: #f0f0f0; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f9f9f9; }
+                        .firma-digital { text-align: center; }
                     </style>
                 </head>
                 <body>
@@ -1562,71 +1444,25 @@
             `;
             
             if (hayFiltros) {
-                contenidoHTML += `
-                    <div class="info-filtros">
-                        <strong>Filtros aplicados:</strong><br>
-                        ${searchInput.value ? `Búsqueda: "${searchInput.value}"<br>` : ''}
-                        ${monthFilter.value ? `Mes: ${monthFilter.options[monthFilter.selectedIndex].text}<br>` : ''}
-                        ${yearFilter.value ? `Año: ${yearFilter.value}<br>` : ''}
-                        ${signatureFilter.value ? `Firma: ${signatureFilter.options[signatureFilter.selectedIndex].text}<br>` : ''}
-                        ${controlFilter.value ? `Control: ${controlFilter.options[controlFilter.selectedIndex].text}<br>` : ''}
-                        ${juzgadoFilter.value ? `Juzgado: ${juzgadoFilter.options[juzgadoFilter.selectedIndex].text}<br>` : ''}
-                        ${intervencionFilter.value ? `Intervención: ${intervencionFilter.options[intervencionFilter.selectedIndex].text}<br>` : ''}
-                        <strong>Total de registros filtrados: ${expedientesFiltrados.length}</strong>
-                    </div>
-                `;
+                contenidoHTML += `<div class="info-filtros"><strong>Filtros aplicados:</strong><br>${searchInput.value ? `Búsqueda: "${searchInput.value}"<br>` : ''}${monthFilter.value ? `Mes: ${monthFilter.options[monthFilter.selectedIndex].text}<br>` : ''}${yearFilter.value ? `Año: ${yearFilter.value}<br>` : ''}${signatureFilter.value ? `Firma: ${signatureFilter.options[signatureFilter.selectedIndex].text}<br>` : ''}${controlFilter.value ? `Control: ${controlFilter.options[controlFilter.selectedIndex].text}<br>` : ''}${juzgadoFilter.value ? `Juzgado: ${juzgadoFilter.options[juzgadoFilter.selectedIndex].text}<br>` : ''}${intervencionFilter.value ? `Intervención: ${intervencionFilter.options[intervencionFilter.selectedIndex].text}<br>` : ''}<strong>Total de registros filtrados: ${expedientesFiltrados.length}</strong></div>`;
             }
             
-            contenidoHTML += `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Fecha de pase</th>
-                                <th>Expediente y Carátula</th>
-                                <th>Descripción</th>
-                                <th>Firma Digital</th>
-                                <th>Observaciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            contenidoHTML += `<table><thead><tr><th>#</th><th>Fecha de pase</th><th>Expediente y Carátula</th><th>Descripción</th><th>Firma Digital</th><th>Observaciones</th></tr></thead><tbody>`;
             
             expedientesFiltrados.forEach((exp, index) => {
                 const numeroDescendente = expedientesFiltrados.length - index;
-                
                 let observacionesTexto = '';
                 if (exp.notas && exp.notas.length > 0) {
                     const ultimaNota = exp.notas[exp.notas.length - 1];
                     observacionesTexto = `${ultimaNota.fecha}: ${ultimaNota.texto.substring(0, 30)}${ultimaNota.texto.length > 30 ? '...' : ''}`;
-                    if (exp.notas.length > 1) {
-                        observacionesTexto += ` (${exp.notas.length} notas)`;
-                    }
+                    if (exp.notas.length > 1) observacionesTexto += ` (${exp.notas.length} notas)`;
                 }
-                
                 const firmaDigital = exp.fechaFirmaDigital ? 'Sí' : 'No';
                 
-                contenidoHTML += `
-                    <tr>
-                        <td>${numeroDescendente}</td>
-                        <td>${exp.fechaPase || 'N/A'}</td>
-                        <td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td>
-                        <td>${exp.descripcion || 'N/A'}</td>
-                        <td class="firma-digital">${firmaDigital}</td>
-                        <td>${observacionesTexto}</td>
-                    </tr>
-                `;
+                contenidoHTML += `<tr><td>${numeroDescendente}</td><td>${exp.fechaPase || 'N/A'}</td><td><strong>${exp.numeroYAnio || 'N/A'}</strong><br>${exp.caratula || 'N/A'}</td><td>${exp.descripcion || 'N/A'}</td><td class="firma-digital">${firmaDigital}</td><td>${observacionesTexto}</td></tr>`;
             });
             
-            contenidoHTML += `
-                        </tbody>
-                    </table>
-                    <p style="text-align: right; margin-top: 20px; font-size: 10px;">
-                        Generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
-                    </p>
-                </body>
-                </html>
-            `;
+            contenidoHTML += `</tbody></table><p style="text-align: right; margin-top: 20px; font-size: 10px;">Generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}</p></body></html>`;
             
             ventanaImpresion.document.write(contenidoHTML);
             ventanaImpresion.document.close();
@@ -1679,7 +1515,7 @@
 
             let notasHTML = 'No hay observaciones registradas';
             if (expediente.notas && expediente.notas.length > 0) {
-                notasHTML = [...expediente.notas].reverse().map(nota => `<div><strong>${nota.fecha}:</strong> ${nota.texto}</div>`).join('');
+                notasHTML = [...expediente.notas].reverse().map(nota => `<div style="margin-bottom:8px;"><strong>${nota.fecha}:</strong> ${nota.texto}</div>`).join('');
             }
             document.getElementById('modal-observaciones').innerHTML = notasHTML;
 
@@ -1814,7 +1650,7 @@
                 mostrarAlerta('Error al guardar el expediente.', 'danger');
             } finally {
                 registroGuardarBtn.disabled = false;
-                registroGuardarBtn.textContent = 'Guardar';
+                registroGuardarBtn.textContent = 'Guardar Expediente';
             }
         }
 
@@ -1844,9 +1680,9 @@
                 const fila = cuerpoTablaNotas.insertRow();
                 const originalIndex = totalNotas - 1 - (inicio + index);
                 fila.innerHTML = `
-                    <td>${nota.fecha}</td>
-                    <td>${nota.texto}</td>
-                    <td><button class="btn-sm btn-danger eliminar-nota-btn" data-index="${originalIndex}">Eliminar</button></td>
+                    <td style="padding:10px; border-bottom:1px solid #e2e8f0;">${nota.fecha}</td>
+                    <td style="padding:10px; border-bottom:1px solid #e2e8f0;">${nota.texto}</td>
+                    <td style="padding:10px; border-bottom:1px solid #e2e8f0;"><button class="btn-sm btn-danger eliminar-nota-btn" data-index="${originalIndex}">Eliminar</button></td>
                 `;
             });
             
@@ -1866,7 +1702,7 @@
             if (totalPaginas <= 1) return;
             for (let i = 1; i <= totalPaginas; i++) {
                 const btnPagina = document.createElement('button');
-                btnPagina.className = `paginacion-btn ${i === paginaActualNotas ? 'active' : ''}`;
+                btnPagina.className = `tabla-paginacion-btn ${i === paginaActualNotas ? 'active' : ''}`;
                 btnPagina.textContent = i;
                 btnPagina.addEventListener('click', () => {
                     paginaActualNotas = i;
@@ -1913,7 +1749,6 @@
             
             printBtn.addEventListener('click', imprimirListado);
             
-            // --- NUEVO COMPORTAMIENTO DEL BOTÓN REPORTE ---
             reporteBtn.addEventListener('click', () => {
                 vistaPrincipal.style.display = 'none';
                 vistaReporte.style.display = 'block';
@@ -1922,9 +1757,8 @@
 
             cerrarReporteBtn.addEventListener('click', () => {
                 vistaReporte.style.display = 'none';
-                vistaPrincipal.style.display = 'block';
+                vistaPrincipal.style.display = 'flex'; // Cambiado de block a flex por el nuevo layout
             });
-            // ----------------------------------------------
             
             nuevoBtn.addEventListener('click', () => abrirModalRegistro());
             
