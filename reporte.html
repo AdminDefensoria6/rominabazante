@@ -573,17 +573,17 @@
                 </style>
                 </head>
                 <body>
-                <h1>📋 Reporte de Causas Judiciales Asignadas</h1>
+                <h1>Reporte de Causas Judiciales Asignadas</h1>
                 <p>Agente Nadia Romina Bazante · Generado el ${new Date().toLocaleDateString()}</p>
                 <p><strong>Total de causas cargadas:</strong> ${total}</p>
                 <hr/>
-                <h2>📌 Resumen por Modo de Intervención</h2>
+                <h2>Resumen por Modo de Intervención</h2>
                 ${generateSimpleTable(rawExpedientes, 'modoIntervencion')}
-                <h2>⚖️ Estado de Control</h2>
+                <h2>Estado de Control</h2>
                 ${generateSimpleTable(rawExpedientes, 'controlSecretario')}
-                <h2>📆 Distribución Anual</h2>
+                <h2>Distribución Anual</h2>
                 ${generateTimeTable(rawExpedientes, 'anual')}
-                <h2>📅 Distribución Mensual (últimos meses)</h2>
+                <h2>Distribución Mensual (últimos meses)</h2>
                 ${generateTimeTable(rawExpedientes, 'mensual', 12)}
                 <hr/>
                 <footer>Sistema de análisis - Datos sincronizados desde Firebase</footer>
