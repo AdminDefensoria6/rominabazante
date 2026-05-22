@@ -1040,7 +1040,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT ORIGINAL CON SOLO LA MODIFICACIÓN DEL AUDIO EN CERRAR SESIÓN -->
+    <!-- SCRIPT ORIGINAL SIN LÓGICA DE AUDIO -->
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1125,9 +1125,8 @@
         let paginaActualTabla = 1;
         const registrosPorPagina = 10;
 
-
         // ==========================================
-        // GUARDIÁN DE RUTA Y CERRAR SESIÓN
+        // GUARDIÁN DE RUTA Y CERRAR SESIÓN (SIN AUDIO)
         // ==========================================
         auth.onAuthStateChanged((user) => {
             if (!user) {
@@ -1139,16 +1138,7 @@
             }
         });
 
-        // ========== MODIFICACIÓN: AUDIO AL CERRAR SESIÓN ==========
-        const audioSalida = new Audio('https://github.com/sistema-secretarios/dra-riveros/raw/refs/heads/main/salida.mp3');
-        audioSalida.preload = 'auto';
-
-        function reproducirSonidoSalida() {
-            audioSalida.play().catch(err => console.warn('Error al reproducir sonido de salida:', err));
-        }
-
         logoutBtn.addEventListener('click', () => {
-            reproducirSonidoSalida(); // 🔊 Reproduce el audio antes de mostrar el modal
             logoutAlertModal.style.display = 'flex';
         });
 
@@ -1167,7 +1157,6 @@
                 mostrarAlerta('Error al cerrar sesión', 'danger');
             });
         });
-        // ========================================================
 
         // --- Funciones de Utilidad ---
         function formatearFecha(fecha) {
@@ -1305,7 +1294,7 @@
                             <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; display: inline-block; ${firmaDigital === 'si' ? 'background: #d1fae5; color: #065f46;' : 'background: #fee2e2; color: #991b1b;'}">
                                 ${firmaDigital === 'si' ? 'Sí' : 'No'}
                             </span>
-                        </td>
+                         </td>
                         <td>${observacionesTexto}</td>
                         <td class="no-print">
                             <button class="btn-sm btn-info ver-btn" data-id="${exp.id}">Ver</button>
@@ -1457,7 +1446,7 @@
                 contenidoHTML += `<div class="info-filtros"><strong>Filtros aplicados:</strong><br>${searchInput.value ? `Búsqueda: "${searchInput.value}"<br>` : ''}${monthFilter.value ? `Mes: ${monthFilter.options[monthFilter.selectedIndex].text}<br>` : ''}${yearFilter.value ? `Año: ${yearFilter.value}<br>` : ''}${signatureFilter.value ? `Firma: ${signatureFilter.options[signatureFilter.selectedIndex].text}<br>` : ''}${controlFilter.value ? `Control: ${controlFilter.options[controlFilter.selectedIndex].text}<br>` : ''}${juzgadoFilter.value ? `Juzgado: ${juzgadoFilter.options[juzgadoFilter.selectedIndex].text}<br>` : ''}${intervencionFilter.value ? `Intervención: ${intervencionFilter.options[intervencionFilter.selectedIndex].text}<br>` : ''}<strong>Total de registros filtrados: ${expedientesFiltrados.length}</strong></div>`;
             }
             
-            contenidoHTML += `<td><thead><tr><th>#</th><th>Fecha de pase</th><th>Expediente y Carátula</th><th>Descripción</th><th>Firma Digital</th><th>Observaciones</th></tr></thead><tbody>`;
+            contenidoHTML += `<table><thead><tr><th>#</th><th>Fecha de pase</th><th>Expediente y Carátula</th><th>Descripción</th><th>Firma Digital</th><th>Observaciones</th></tr></thead><tbody>`;
             
             expedientesFiltrados.forEach((exp, index) => {
                 const numeroDescendente = expedientesFiltrados.length - index;
@@ -1767,7 +1756,7 @@
 
             cerrarReporteBtn.addEventListener('click', () => {
                 vistaReporte.style.display = 'none';
-                vistaPrincipal.style.display = 'flex'; // Cambiado de block a flex por el nuevo layout
+                vistaPrincipal.style.display = 'flex';
             });
             
             nuevoBtn.addEventListener('click', () => abrirModalRegistro());
