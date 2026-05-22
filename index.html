@@ -115,7 +115,7 @@
 
         .info-institucional p:first-child { font-weight: 700; color: #000; }
 
-        /* Imagen con anillo rotatorio */
+        /* Imagen con anillo rotatorio (sin audio) */
         .img-container {
             flex: 1;
             display: flex;
@@ -130,14 +130,6 @@
             display: inline-block;
             border-radius: 50%;
             animation: float 6s ease-in-out infinite, softPulse 3s ease-in-out infinite;
-            cursor: pointer;
-            outline: none;
-        }
-
-        /* Accesibilidad: foco visible */
-        .img-wrapper:focus-visible {
-            box-shadow: 0 0 0 4px #00BFFF;
-            border-radius: 50%;
         }
 
         .img-wrapper::before {
@@ -170,57 +162,6 @@
             filter: blur(8px);
         }
 
-        /* --- ESTADOS DINÁMICOS DEL AUDIO (sobreescriben animaciones) --- */
-        .img-wrapper.cargando::before {
-            animation: rotateRing 1s linear infinite;
-            filter: saturate(1.5);
-        }
-
-        .img-wrapper.reproduciendo::before {
-            animation: rotateRing 2s linear infinite;
-            box-shadow: 0 0 35px rgba(40, 167, 69, 0.7);
-            background: conic-gradient(from 0deg, #00ffff, #28a745, #00ffff);
-        }
-
-        /* Badge de audio flotante (descubrimiento visual) */
-        .audio-badge {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background-color: #001f3f;
-            color: white;
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            font-size: 1.2rem;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid #00BFFF;
-            pointer-events: none;  /* El clic lo maneja el wrapper */
-            backdrop-filter: blur(2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .img-wrapper:hover .audio-badge {
-            transform: scale(1.15);
-            background-color: #003366;
-        }
-
-        .img-wrapper.reproduciendo .audio-badge {
-            background-color: #28a745;
-            border-color: #ffffff;
-            animation: pulseBadge 1.5s infinite;
-        }
-
-        @keyframes pulseBadge {
-            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-        }
-
         @keyframes rotateRing {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -250,7 +191,6 @@
             border-radius: 50%;
             box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
             transition: transform 0.3s ease;
-            pointer-events: none;
         }
 
         .img-3d:hover {
@@ -373,13 +313,6 @@
             .formulario-login h2 { text-align: center; }
             .img-wrapper::before { top: -10px; left: -10px; right: -10px; bottom: -10px; }
             .img-wrapper::after { top: -18px; left: -18px; right: -18px; bottom: -18px; }
-            .audio-badge {
-                width: 38px;
-                height: 38px;
-                font-size: 1rem;
-                bottom: 10px;
-                right: 10px;
-            }
         }
         
         /* Alerta flotante */
@@ -428,19 +361,11 @@
                 </div>
             </div>
             <div class="img-container">
-                <!-- Elemento interactivo de audio: imagen con anillos y badge -->
-                <div class="img-wrapper" id="imagenAudioWrapper" 
-                     role="button" 
-                     tabindex="0" 
-                     aria-label="Reproducir o pausar saludo institucional" 
-                     title="Haga clic para escuchar el saludo">
-                    
+                <!-- Imagen decorativa con anillo rotatorio (sin audio) -->
+                <div class="img-wrapper">
                     <img src="https://github.com/sistema-secretarios/imagenes-sistema/blob/main/pc.png?raw=true" 
                          alt="Sistema Digital Defensoría" 
                          class="img-3d">
-                    
-                    <!-- Badge visual que indica estado del audio -->
-                    <div class="audio-badge" id="audioBadge" aria-hidden="true">🔊</div>
                 </div>
             </div>
         </div>
@@ -548,154 +473,6 @@
                 setTimeout(() => flotante.remove(), 1000);
             }
         }, 5000);
-
-        // ======================== INTEGRACIÓN DE AUDIO MP3 (SALUDO INSTITUCIONAL - VOZ FEMENINA) ========================
-        // Audio único con la pista solicitada: ingreso-mujer-a.mp3
-        const AUDIO_URL = 'https://github.com/AdminDefensoria6/rf-causas/raw/refs/heads/main/ingreso-mujer-a.mp3';
-        
-        let currentAudio = null;          // Instancia del Audio
-        const imgWrapper = document.getElementById('imagenAudioWrapper');
-        const audioBadge = document.getElementById('audioBadge');
-
-        // Función central que maneja reproducción/pausa con feedback visual
-        function toggleSaludoInstitucional() {
-            if (!imgWrapper || !audioBadge) return;
-
-            // Si no existe la instancia de audio, la creamos
-            if (!currentAudio) {
-                currentAudio = new Audio(AUDIO_URL);
-                currentAudio.preload = 'auto';
-
-                // Evento: inicio de carga / buffering
-                currentAudio.addEventListener('waiting', () => {
-                    imgWrapper.classList.add('cargando');
-                    audioBadge.textContent = '⏳';
-                });
-
-                // Evento: reproducción activa
-                currentAudio.addEventListener('playing', () => {
-                    imgWrapper.classList.remove('cargando');
-                    imgWrapper.classList.add('reproduciendo');
-                    audioBadge.textContent = '⏸️';
-                });
-
-                // Evento: pausa (manual o por interrupción)
-                currentAudio.addEventListener('pause', () => {
-                    imgWrapper.classList.remove('reproduciendo', 'cargando');
-                    audioBadge.textContent = '🔊';
-                });
-
-                // Evento: finalización natural de la pista
-                currentAudio.addEventListener('ended', () => {
-                    imgWrapper.classList.remove('reproduciendo', 'cargando');
-                    audioBadge.textContent = '🔊';
-                    currentAudio.currentTime = 0;   // Reiniciamos para próximas reproducciones
-                });
-
-                // Evento: error de carga o red
-                currentAudio.addEventListener('error', (e) => {
-                    imgWrapper.classList.remove('reproduciendo', 'cargando');
-                    audioBadge.textContent = '⚠️';
-                    console.error('Error al cargar el audio:', e);
-                    // Mensaje sutil para el usuario
-                    const errorMsg = document.createElement('div');
-                    errorMsg.textContent = '❌ No se pudo cargar el audio institucional';
-                    errorMsg.style.position = 'fixed';
-                    errorMsg.style.bottom = '20px';
-                    errorMsg.style.left = '20px';
-                    errorMsg.style.backgroundColor = 'rgba(0,0,0,0.7)';
-                    errorMsg.style.color = 'white';
-                    errorMsg.style.padding = '8px 15px';
-                    errorMsg.style.borderRadius = '40px';
-                    errorMsg.style.fontSize = '0.8rem';
-                    errorMsg.style.zIndex = '9999';
-                    errorMsg.style.opacity = '0';
-                    errorMsg.style.transition = 'opacity 0.3s';
-                    document.body.appendChild(errorMsg);
-                    setTimeout(() => { errorMsg.style.opacity = '1'; }, 10);
-                    setTimeout(() => {
-                        errorMsg.style.opacity = '0';
-                        setTimeout(() => errorMsg.remove(), 400);
-                    }, 3000);
-                });
-            }
-
-            // Estado actual: si ya está sonando y no está pausado, lo pausamos
-            if (!currentAudio.paused) {
-                currentAudio.pause();
-                return;
-            }
-
-            // Si está pausado o nunca se inició, se reproduce
-            // Mostramos estado de carga mientras intenta reproducir
-            imgWrapper.classList.add('cargando');
-            audioBadge.textContent = '⏳';
-            
-            currentAudio.play().catch(error => {
-                // Fallo de reproducción (políticas de autoplay o red)
-                imgWrapper.classList.remove('cargando');
-                audioBadge.textContent = '🔊';
-                console.warn('No se pudo reproducir el audio:', error);
-                // Mensaje no invasivo
-                const subtleMsg = document.createElement('div');
-                subtleMsg.textContent = '🔇 Haz clic otra vez para escuchar el saludo';
-                subtleMsg.style.position = 'fixed';
-                subtleMsg.style.bottom = '20px';
-                subtleMsg.style.left = '20px';
-                subtleMsg.style.backgroundColor = 'rgba(0,0,0,0.7)';
-                subtleMsg.style.color = 'white';
-                subtleMsg.style.padding = '8px 15px';
-                subtleMsg.style.borderRadius = '40px';
-                subtleMsg.style.fontSize = '0.8rem';
-                subtleMsg.style.zIndex = '9999';
-                subtleMsg.style.opacity = '0';
-                subtleMsg.style.transition = 'opacity 0.3s';
-                document.body.appendChild(subtleMsg);
-                setTimeout(() => { subtleMsg.style.opacity = '1'; }, 10);
-                setTimeout(() => {
-                    subtleMsg.style.opacity = '0';
-                    setTimeout(() => subtleMsg.remove(), 400);
-                }, 2500);
-            });
-        }
-
-        // Asignar eventos de interacción: clic y teclado (accesibilidad total)
-        if (imgWrapper) {
-            imgWrapper.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleSaludoInstitucional();
-            });
-            
-            // Soporte para teclado: Enter o Espacio
-            imgWrapper.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleSaludoInstitucional();
-                }
-            });
-        }
-
-        // Optimización: pausar audio si la pestaña pierde visibilidad (mejora UX)
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && currentAudio && !currentAudio.paused) {
-                currentAudio.pause();
-            }
-        });
-        
-        // Limpieza simbólica: si el usuario navega o recarga, se libera el audio (sin errores)
-        window.addEventListener('beforeunload', () => {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.src = '';
-                currentAudio = null;
-            }
-        });
-        
-        // Verificación por si el wrapper no existe (respaldo silencioso)
-        if (!imgWrapper) {
-            console.warn('No se encontró el contenedor de audio, verificar estructura HTML');
-        }
     </script>
 </body>
 </html>
