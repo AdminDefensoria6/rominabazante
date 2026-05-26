@@ -12,6 +12,7 @@
     <!-- Fuente moderna Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 
+    <!-- ESTILO VISUAL COMPLETO COPIADO DE INDEX.HTML (diseño moderno con anillos, gradientes, vidrio) -->
     <style>
         * {
             margin: 0;
@@ -19,40 +20,60 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --fondo-base: #f8fafc;
+            --fondo-tarjeta: rgba(255, 255, 255, 0.92);
+            --texto-primario: #0a1e2f;
+            --texto-secundario: #2c3e50;
+            --acento: #00b4d8;
+            --acento-oscuro: #0077b6;
+            --sombra-suave: 0 20px 35px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 180, 216, 0.1);
+            --radius-grande: 2rem;
+            --radius-medio: 1.25rem;
+            --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
         body, html {
             height: 100%;
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%);
             overflow-x: hidden;
-            color: #001f3f;
+            color: var(--texto-primario);
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Créditos flotantes (se desvanecen) */
+        /* Créditos flotantes refinados */
         #creditos-flotante {
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #001f3f;
+            background: rgba(10, 30, 47, 0.85);
+            backdrop-filter: blur(8px);
             color: white;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 8px 18px;
+            border-radius: 40px;
             z-index: 1100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             animation: fadeIn 0.5s ease-out forwards;
             transition: opacity 1s ease-out, transform 1s ease-out;
+            font-weight: 500;
+            letter-spacing: -0.01em;
         }
 
         .texto-autor {
-            font-size: 0.7rem;
-            font-weight: 400;
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.95;
         }
 
         .texto-version {
             font-size: 0.6rem;
-            opacity: 0.8;
+            opacity: 0.7;
             margin-top: 2px;
         }
 
@@ -76,31 +97,32 @@
             padding: 2rem 1.5rem;
         }
 
-        /* Tarjeta blanca con luz celeste */
+        /* Tarjeta central con efecto vidrio moderno */
         .card-central {
             max-width: 750px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(2px);
-            border-radius: 64px;
-            padding: 2rem 2rem 2.5rem;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(0, 191, 255, 0.1), 0 0 30px rgba(0, 191, 255, 0.3);
+            background: var(--fondo-tarjeta);
+            backdrop-filter: blur(4px);
+            border-radius: var(--radius-grande);
+            padding: 2rem 2rem 2.8rem;
+            box-shadow: var(--sombra-suave);
             text-align: center;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        /* Imagen con anillos rotatorios (clic para abrir modal) */
+        /* Imagen con anillos rotatorios mejorados */
         .img-wrapper {
             position: relative;
             display: inline-block;
             border-radius: 50%;
-            animation: float 6s ease-in-out infinite, softPulse 3s ease-in-out infinite;
+            animation: float 5s ease-in-out infinite, softPulse 3s ease-in-out infinite;
             cursor: pointer;
             outline: none;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             width: 280px;
             height: auto;
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .img-wrapper::before {
@@ -111,11 +133,11 @@
             right: -15px;
             bottom: -15px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, #00ffff, #0044ff, #ff00cc, #00ffff);
+            background: conic-gradient(from 0deg, #00ffff, #0077b6, #00b4d8, #00ffff);
             opacity: 0.7;
             z-index: -1;
             animation: rotateRing 4s linear infinite;
-            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
         }
 
         .img-wrapper::after {
@@ -126,10 +148,10 @@
             right: -25px;
             bottom: -25px;
             border-radius: 50%;
-            background: conic-gradient(from 90deg, rgba(0, 255, 255, 0.3), rgba(0, 68, 255, 0.3), rgba(255, 0, 204, 0.3), rgba(0, 255, 255, 0.3));
+            background: conic-gradient(from 90deg, rgba(0, 255, 255, 0.25), rgba(0, 119, 182, 0.25), rgba(0, 180, 216, 0.25), rgba(0, 255, 255, 0.25));
             z-index: -2;
             animation: rotateRingReverse 6s linear infinite;
-            filter: blur(8px);
+            filter: blur(10px);
         }
 
         .img-3d {
@@ -138,13 +160,9 @@
             height: auto;
             display: block;
             border-radius: 50%;
-            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
+            box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.25s ease;
             pointer-events: none;
-        }
-
-        .img-3d:hover {
-            transform: scale(1.02);
         }
 
         @keyframes rotateRing {
@@ -158,9 +176,9 @@
         }
 
         @keyframes softPulse {
-            0% { filter: drop-shadow(0 0 5px rgba(0,191,255,0.3)); }
-            50% { filter: drop-shadow(0 0 20px rgba(0,191,255,0.6)); }
-            100% { filter: drop-shadow(0 0 5px rgba(0,191,255,0.3)); }
+            0% { filter: drop-shadow(0 0 5px rgba(0,180,216,0.3)); }
+            50% { filter: drop-shadow(0 0 18px rgba(0,180,216,0.5)); }
+            100% { filter: drop-shadow(0 0 5px rgba(0,180,216,0.3)); }
         }
 
         @keyframes float {
@@ -168,53 +186,59 @@
             50% { transform: translateY(-12px); }
         }
 
-        /* TÍTULO PRINCIPAL CON EFECTO DE LUZ (brillo magnético) */
+        /* Título principal con gradiente animado (estilo moderno) */
         .titulo-principal {
-            font-size: clamp(2.8rem, 10vw, 5rem);
-            font-weight: 900;
+            font-size: clamp(2.5rem, 8vw, 4.2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
             line-height: 1.2;
-            letter-spacing: -0.03em;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-            white-space: normal;
-            background: linear-gradient(90deg, #001f3f 20%, #00BFFF 45%, #004e92 70%, #001f3f 90%);
-            background-size: 300% 100%;
-            -webkit-background-clip: text;
+            margin: 1rem 0 0.5rem;
+            background: linear-gradient(135deg, #0a2b3e 0%, #0077b6 40%, #00b4d8 80%, #0a2b3e 100%);
+            background-size: 200% auto;
             background-clip: text;
+            -webkit-background-clip: text;
             color: transparent;
-            animation: brilloMagnetico 3.5s ease-in-out infinite alternate;
+            animation: shimmer 5s ease infinite;
+            text-wrap: balance;
         }
 
-        @keyframes brilloMagnetico {
+        @keyframes shimmer {
             0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
+        /* Subtítulo y nombre con estilo refinado */
         .subtitulo-azul {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #0055a4;
+            color: #0077b6;
             margin-bottom: 0.5rem;
             letter-spacing: -0.2px;
+            background: linear-gradient(120deg, #005f8c, #00b4d8);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
         }
 
         .nombre-agente {
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             color: #2c5282;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.6);
             display: inline-block;
-            padding: 0.2rem 1rem;
+            padding: 0.3rem 1.2rem;
             border-radius: 40px;
             backdrop-filter: blur(2px);
-            margin-top: 0.2rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         /* Responsive */
         @media (max-width: 640px) {
             .card-central {
                 padding: 1.5rem;
-                border-radius: 48px;
+                border-radius: 2rem;
             }
             .img-wrapper {
                 width: 220px;
@@ -239,15 +263,15 @@
             }
         }
 
-        /* ========= MODALES (login / registro) ========= */
+        /* ========= MODALES CON ESTILO MODERNO ========= */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 15, 30, 0.75);
-            backdrop-filter: blur(5px);
+            background-color: rgba(10, 30, 47, 0.75);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -264,14 +288,15 @@
 
         .modal-contenido {
             background: #ffffff;
-            max-width: 460px;
+            max-width: 480px;
             width: 90%;
             border-radius: 2rem;
             padding: 2rem 1.8rem;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2);
             position: relative;
-            transform: scale(0.95);
+            transform: scale(0.96);
             transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(0, 180, 216, 0.2);
         }
 
         .modal-overlay.active .modal-contenido {
@@ -286,20 +311,24 @@
             border: none;
             font-size: 1.8rem;
             cursor: pointer;
-            color: #888;
+            color: #8ba0b5;
             transition: 0.2s;
             line-height: 1;
+            font-weight: 300;
         }
 
         .btn-cerrar-modal:hover {
-            color: #001f3f;
+            color: #0a2b3e;
         }
 
         .modal-contenido h3 {
-            font-weight: 900;
+            font-weight: 800;
             font-size: 1.8rem;
             margin-bottom: 1.5rem;
-            color: #001f3f;
+            background: linear-gradient(135deg, #0a2b3e, #0077b6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             letter-spacing: -0.02em;
         }
 
@@ -313,24 +342,33 @@
         .grupo-input label {
             font-size: 0.7rem;
             font-weight: 700;
-            color: #5a6e82;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4a627a;
         }
 
         .grupo-input input {
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
+            padding: 14px 16px;
+            border: 1.5px solid #e2edf7;
+            border-radius: 20px;
             font-size: 0.95rem;
-            background-color: #fcfdff;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
             transition: all 0.2s;
             width: 100%;
+            font-weight: 450;
+            color: #0a2b3e;
         }
 
         .grupo-input input:focus {
             outline: none;
-            border-color: #00BFFF;
-            box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
+            border-color: #00b4d8;
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+        }
+
+        .grupo-input input::placeholder {
+            color: #b9cee8;
+            font-weight: 400;
         }
 
         .mostrar-clave {
@@ -338,7 +376,8 @@
             align-items: center;
             gap: 8px;
             font-size: 0.8rem;
-            color: #2c3e50;
+            font-weight: 500;
+            color: #2c4c6e;
             margin: -5px 0 12px 0;
             cursor: pointer;
         }
@@ -346,62 +385,74 @@
         .btn-modal-primario {
             width: 100%;
             padding: 14px;
-            background: #001f3f;
+            background: #0a2b3e;
             color: white;
             border: none;
             border-radius: 40px;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
             margin-top: 8px;
-            transition: 0.2s;
+            transition: all 0.2s;
+            letter-spacing: -0.2px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .btn-modal-primario:hover {
-            background: #0a2f50;
+            background: #005f8c;
             transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 120, 180, 0.25);
         }
 
         .enlace-modal {
             text-align: center;
             margin-top: 1.2rem;
             font-size: 0.85rem;
+            font-weight: 500;
+            color: #4a627a;
         }
 
         .enlace-modal span {
-            color: #00a3cc;
+            color: #0077b6;
             font-weight: 700;
             cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .enlace-modal span:hover {
+            color: #00b4d8;
             text-decoration: underline;
         }
 
-        /* Toast de mensajes */
+        /* Toast messages */
         .auth-message-global {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e2a36;
+            background: #0a2b3e;
             color: white;
             padding: 12px 24px;
             border-radius: 60px;
             font-size: 0.9rem;
+            font-weight: 500;
             z-index: 2100;
             display: none;
-            backdrop-filter: blur(8px);
-            background: rgba(0, 31, 63, 0.95);
-            font-weight: 500;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            background: rgba(10, 43, 62, 0.95);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
             text-align: center;
             max-width: 85vw;
+            letter-spacing: -0.2px;
         }
 
         .auth-message-global.error {
-            background: #c0392b;
+            background: #bc4742;
         }
 
         .auth-message-global.success {
-            background: #2c6e2f;
+            background: #2a9d8f;
         }
     </style>
 </head>
@@ -425,14 +476,14 @@
                      class="img-3d">
             </div>
 
-            <!-- Título con efecto de luz -->
+            <!-- Título con efecto de luz mejorado -->
             <h1 class="titulo-principal">Expedientes Asignados</h1>
             <p class="subtitulo-azul">Defensoría Civil y Comercial N° 6</p>
             <div class="nombre-agente">Nadia Romina Bazante</div>
         </div>
     </div>
 
-    <!-- MODAL LOGIN -->
+    <!-- MODAL LOGIN (estructura moderna) -->
     <div id="modalLogin" class="modal-overlay">
         <div class="modal-contenido">
             <button class="btn-cerrar-modal" id="cerrarModalLoginBtn">&times;</button>
@@ -457,7 +508,7 @@
         </div>
     </div>
 
-    <!-- MODAL REGISTRO -->
+    <!-- MODAL REGISTRO (estructura moderna) -->
     <div id="modalRegistro" class="modal-overlay">
         <div class="modal-contenido">
             <button class="btn-cerrar-modal" id="cerrarModalRegistroBtn">&times;</button>
@@ -489,6 +540,7 @@
     <!-- Toast de mensajes -->
     <div id="globalAuthMessage" class="auth-message-global"></div>
 
+    <!-- SCRIPT: LÓGICA ORIGINAL DE ROMINA (Firebase Bazante + funciones de autenticación intactas) -->
     <script>
         // ======================== CONFIGURACIÓN FIREBASE (PROYECTO BAZANTE - ORIGINAL) ========================
         const firebaseConfig = {
@@ -593,7 +645,7 @@
             }
         };
 
-        // Redirección si ya está autenticado (evita bucle)
+        // Redirección si ya está autenticado (evita bucle) - ruta específica de Bazante
         auth.onAuthStateChanged((user) => {
             if (user && !isRegistering && !isLoggingIn && (window.location.pathname.includes('usar.html') || window.location.pathname === '/' || window.location.pathname === '')) {
                 window.location.href = 'app.html';
